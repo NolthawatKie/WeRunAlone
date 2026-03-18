@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(claude-developer-platform)",
+      "Skill(claude-developer-platform:*)",
+      "Bash(ls \"C:/Users/nolthawat_k/Desktop/Banpu/99 Others/WeRunAlone/.env\"*)",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}
