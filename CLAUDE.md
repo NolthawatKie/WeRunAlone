@@ -18,8 +18,8 @@ No test suite is configured. There is no test runner — verify changes visually
 Requires `.env.local` at the project root (not committed to git):
 ```
 ANTHROPIC_API_KEY=sk-ant-...
-NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
 WAQI_TOKEN=...
 ```
@@ -202,7 +202,7 @@ Model: `claude-sonnet-4-6`, `max_tokens: 8192`.
 - `ANTHROPIC_API_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `WAQI_TOKEN`
-- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are public-safe but still best kept out of git
+- `SUPABASE_URL` and `SUPABASE_ANON_KEY` are public-safe but still best kept out of git
 
 ## Deployment (free, showcase)
 
@@ -210,7 +210,7 @@ Model: `claude-sonnet-4-6`, `max_tokens: 8192`.
 - Free Hobby tier: unlimited deployments, custom domain, edge network
 - Connect GitHub repo → auto-deploy on push to `main`
 - Set all env vars in Vercel dashboard → Settings → Environment Variables
-- `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `WAQI_TOKEN`
+- `ANTHROPIC_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `WAQI_TOKEN`
 - No server config needed — Vercel handles Next.js API routes as serverless functions automatically
 
 **Supabase** is already the DB — free tier covers this use case (500 MB, 2 GB bandwidth/month).
