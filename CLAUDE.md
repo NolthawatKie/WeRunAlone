@@ -38,6 +38,8 @@ WAQI_TOKEN=...
 |-------|------|-------------|
 | `/` | `app/page.tsx` | Main app — landing + 4-step form + similar plans + plan output |
 | `/community` | `app/community/page.tsx` | Browse & view shared community plans |
+| `/about` | `app/about/page.tsx` | Static server component — objective, stack, architecture, design decisions |
+| `/updates` | `app/updates/page.tsx` | Server component — reads `updatelog.md`, renders changelog as table |
 
 ### Data flow
 
@@ -68,7 +70,7 @@ app/community/page.tsx
 StepFour's "Find Similar Plans" button triggers `handleFindSimilar` in `page.tsx`:
 1. Queries `GET /api/community/list?target=...&level=...&weeksNear=N` (returns plans with `weeks BETWEEN N-2 AND N+2`, ordered by `download_count DESC`, limit 3)
 2. If results → `appState = 'similar'` → shows `SimilarPlansPanel`
-3. If no results → falls through directly to `handleGenerate` (no user friction)
+3. If no results → sets `modal = 'no_similar'` → popup asks user to confirm before generating
 
 From `SimilarPlansPanel`:
 - **"Use This Plan"** → `POST /api/community/download/{id}` (increments download_count, returns plan_data) → sets plan state → `appState = 'output'`
@@ -203,29 +205,34 @@ Model: `claude-sonnet-4-6`, `max_tokens: LIMITS.MAX_OUTPUT_TOKENS` (default 14,0
 **Error handling in generate API:**
 - `stop_reason === 'max_tokens'` → returns `{ error: 'TOKEN_LIMIT' }` status 422 immediately (no retry). Frontend shows a modal telling user to reduce weeks/days/distance.
 - Rate limit exceeded → returns `{ error: 'RATE_LIMIT' }` status 429. Frontend shows a modal explaining the lifetime limit.
-- Both modal types rendered in `app/page.tsx` via `modal: ModalType` state (`'token_limit' | 'rate_limit' | null`).
+- No similar plans found → sets `modal = 'no_similar'` — popup with "Go back" or "Build my plan" buttons.
+- All modal types rendered in `app/page.tsx` via `modal: ModalType` state (`'token_limit' | 'rate_limit' | 'no_similar' | null`).
 
-**Cost profile** (realistic plans use 750–3,500 output tokens; warmup/cooldown excluded from AI output):
-- Min (Fun Run, 4w, 3 days): ~$0.013/call
-- Typical (Half Marathon, 16w, 5 days): ~$0.041/call
-- Max realistic (Full Marathon, 30w, 7 days): ~$0.050/call
+**Cost profile** (descriptions removed from all sessions; realistic plans now use ~500–2,500 output tokens):
+- Min (Fun Run, 4w, 3 days): ~$0.008/call
+- Typical (Half Marathon, 16w, 5 days): ~$0.027/call
+- Max realistic (Full Marathon, 30w, 7 days): ~$0.035/call
 - Token limit hit (14k): ~$0.213/call
 
 ### Key design decisions
 
-- **Similar plans before generation** — StepFour queries community plans matching target + level + ±2 weeks before calling Claude. Zero AI cost if user picks a community plan. If no matches, falls through to generation transparently.
-- **Warmup/cooldown server-injected** — Claude does not generate warmup/cooldown (saves ~10–20% output tokens). Static templates in `lib/workout-templates.ts`, injected after parse.
+- **Similar plans before generation** — StepFour queries community plans matching target + level + ±2 weeks before calling Claude. Zero AI cost if user picks a community plan. If no matches, `modal = 'no_similar'` popup asks user to confirm before generating.
+- **No descriptions in prompt** — Claude does not generate `description` text for any session type (runs, strength, plyo). Run sessions show pace, distance, zone, and effort chips only. Exercises show name + sets×reps. Saves ~25–35% output tokens on top of warmup/cooldown savings.
+- **Warmup/cooldown server-injected** — Claude does not generate warmup/cooldown (saves ~10–20% output tokens). Static templates in `lib/workout-templates.ts`, injected after parse. Exercises show name + sets×reps + note (note carries "each leg/side" qualifiers from the template).
 - **All limits in `lib/config.ts`** — `PLAN_GENERATIONS_PER_IP`, `COMMUNITY_SHARES_PER_DAY`, `MAX_OUTPUT_TOKENS`. Change once, applies everywhere.
 - **All app state in `page.tsx`** — step number, form fields, race history, plan result, similar plans, modals. Child components are controlled via props + callbacks.
+- **Days always sorted Mon→Sun** — `sortDays()` helper in `page.tsx` is called in `handleDayToggle` and `handleUseThisPlan`. `CommunityPlanModal` sorts `runDays` at display time. Never sort inside child components — sort at the state level.
 - **Run type colors** are defined in `OutputPlan.tsx` via `RUN_TYPE_CONFIG` and `SESSION_STYLES` maps. Same maps duplicated in `CommunityPlanModal.tsx`. Adding a new run type requires updating both files.
-- **Image export** uses a dedicated `PlanExportView` component (`components/PlanExportView.tsx`) rendered off-screen at fixed 800px with all inline styles. Captured via `html-to-image` `toPng()` with `pixelRatio: 2`, double-render pass (warmup + real capture), and `await document.fonts.ready` for correct font rendering. Mobile uses Web Share API; desktop uses `link.click()` download.
+- **Image export** uses a dedicated `PlanExportView` component (`components/PlanExportView.tsx`) rendered off-screen at fixed 800px with all inline styles. Captured via `html-to-image` `toPng()` with `pixelRatio: 2`, double-render pass (warmup + real capture), and `await document.fonts.ready` for correct font rendering. Mobile uses Web Share API; desktop uses `link.click()` download. `PlanExportView` must render identically to `OutputPlan` — keep session rendering in sync across all three: `OutputPlan`, `CommunityPlanModal`, `PlanExportView`.
 - **`PlanExportView`** is used by both `OutputPlan` and `CommunityPlanModal`. It accepts `plan`, `planLabel`, `meta: PlanExportMeta[]`, and optional `sharedBy`. All colors are inline hex — no Tailwind.
 - **`@anthropic-ai/sdk`** is listed in `serverComponentsExternalPackages` in `next.config.mjs` so it only runs server-side.
 - **HR Max is required** in StepThree — the "Next" button is disabled until a value is entered.
 - **Race history validation** in StepTwo: experienced runners must add at least one race (unless target is Fun Run).
 - **Target time is required** in StepOne — Next is blocked until a valid finish time is set. Too-fast times (below `minTotalMin`) are rejected with an error message.
 - **`TimeInput` component** (`components/TimeInput.tsx`) is a shared H+MM dropdown pair. Used for target time (StepOne), beginner PB (StepTwo), and race PRs (StepTwo). `maxHours` prop controls the hour range per context.
-- **Community sharing** — `OutputPlan` sends `target: formSummary.targetLabel` (e.g. `'Fun Run'`) to the save API. The community page filter dropdown `value` fields must match these exact strings.
+- **Community sharing** — user names their plan in `ShareModal` before sharing; `handleShare` sends both `plan_name` (user-chosen) and `plan_data` with `planName` updated to match. `OutputPlan` sends `target: formSummary.targetLabel` (e.g. `'Fun Run'`) to the save API. The community page filter dropdown `value` fields must match these exact strings.
+- **Navigation** — all page headers share the same three nav links (Community · About · Updates). Active page is highlighted with `bg-blue-50 text-blue-600`.
+- **Updates page** — `app/updates/page.tsx` is a server component that reads `updatelog.md` with `fs.readFileSync(path.join(process.cwd(), 'updatelog.md'))`. Parse: split by `\n`, filter lines starting with `|`, skip first two (header + separator), split each line by `|`. Add a new row to `updatelog.md` and redeploy after every change.
 
 ### Config (`lib/config.ts`)
 

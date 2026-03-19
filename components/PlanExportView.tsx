@@ -83,28 +83,27 @@ function ESession({ s }: { s: Session }) {
         </div>
       )}
 
-      {s.description && (
-        <p style={{ fontSize: 11, color: '#64748b', lineHeight: 1.5, margin: 0 }}>{s.description}</p>
-      )}
-
       {(s.type === 'strength' || s.type === 'plyometrics') && s.exercises && s.exercises.length > 0 && (
         <div style={{ marginTop: 5 }}>
           {s.exercises.map((ex, i) => {
             const isSt = s.type === 'strength';
             return (
-              <div key={i} style={{
-                background: isSt ? '#f5f3ff' : '#fefce8',
-                border: `1px solid ${isSt ? '#ddd6fe' : '#fef08a'}`,
-                borderRadius: 5, padding: '4px 7px', marginBottom: 3,
-              }}>
-                <span style={{ fontSize: 11, fontWeight: 600, color: isSt ? '#6d28d9' : '#a16207' }}>{ex.name}</span>
-                <span style={{ fontSize: 11, color: isSt ? '#8b5cf6' : '#ca8a04', marginLeft: 6 }}>{ex.sets} × {ex.reps} reps</span>
-                {ex.note && (
-                  <p style={{ fontSize: 10, color: isSt ? '#8b5cf6' : '#ca8a04', margin: '2px 0 0', lineHeight: 1.4 }}>{ex.note}</p>
-                )}
+              <div key={i} style={{ fontSize: 11, color: isSt ? '#6d28d9' : '#a16207', lineHeight: 1.6, marginBottom: 1 }}>
+                • {ex.name} {ex.sets}×{ex.reps}
               </div>
             );
           })}
+        </div>
+      )}
+
+      {(s.type === 'warmup' || s.type === 'cooldown') && s.exercises && s.exercises.length > 0 && (
+        <div style={{ marginTop: 4 }}>
+          {s.exercises.map((ex, i) => (
+            <div key={i} style={{ fontSize: 11, color: '#15803d', lineHeight: 1.5, marginBottom: 2 }}>
+              • {ex.name} {ex.sets}×{ex.reps}
+              {ex.note && <span style={{ color: '#22c55e', marginLeft: 4 }}>{ex.note}</span>}
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -8,14 +8,16 @@ Users fill a 4-step form → Claude generates a personalised plan → export as 
 
 ## Features
 
-- **4-step plan builder** — race target, level/experience, HR Max, review
-- **Similar plans search** — before generating, shows matching community plans (same target + level + ±2 weeks); use one directly or generate new
-- **AI plan generation** — `claude-sonnet-4-6` builds a fully structured multi-phase plan with run, strength, and plyometrics sessions
+- **4-step plan builder** — race target + finish time, level/experience, HR Max, review
+- **Similar plans search** — before generating, shows matching community plans (same target + level + ±2 weeks); use one directly or generate new; popup if no match found
+- **AI plan generation** — `claude-sonnet-4-6` builds a fully structured multi-phase plan with run, strength, and plyometrics sessions (no descriptions generated — saves ~25–35% output tokens)
 - **Warmup/cooldown templates** — 8 static templates (4 targets × 2 levels) injected server-side after generation; not consumed from AI tokens
-- **PNG export** — save plan as image; mobile uses Web Share API, desktop downloads directly
-- **Community feed** — browse, filter, view, and save shared plans; saves counter increments on export
+- **PNG export** — save plan as image (mobile uses Web Share API, desktop downloads directly); export matches on-screen display exactly
+- **Community feed** — browse, filter, view, and save shared plans; user names their plan before sharing; saves counter increments on export
 - **Weather widget** — run condition score based on location, temperature, humidity, wind, and AQI
-- **Rate limiting** — 3 plan generations per IP (lifetime); 3 community shares per IP lifetime
+- **Rate limiting** — 3 plan generations per IP (lifetime); 3 community shares per IP per day
+- **About page** — objective, tech stack, structure, and key design decisions
+- **Updates page** — changelog rendered from `updatelog.md` in the repo root
 
 ---
 
@@ -142,18 +144,32 @@ export const LIMITS = {
 
 ---
 
+## Pages
+
+| Route | Description |
+|-------|-------------|
+| `/` | Main app — landing + 4-step form + similar plans + plan output |
+| `/community` | Browse & filter shared community plans |
+| `/about` | Project objective, tech stack, and architecture overview |
+| `/updates` | Changelog — rendered from `updatelog.md` at build time |
+
+---
+
 ## Architecture
 
 ```
 app/page.tsx                   — all state: steps, form, plan, modals, similar plans
-  ├── LandingPage              — hero + weather widget
+  ├── LandingPage              — hero + run type guide + weather widget
   ├── StepOne–Four             — 4-step form
   ├── SimilarPlansPanel        — community plan search before generation
   ├── LoadingSkeleton          — shown during AI call
-  └── OutputPlan               — renders plan + export + share
+  └── OutputPlan               — renders plan + export + share (user names plan before sharing)
 
 app/community/page.tsx         — browse & filter community plans
   └── CommunityPlanModal       — full plan view + export
+
+app/about/page.tsx             — static about page (server component)
+app/updates/page.tsx           — reads updatelog.md, renders changelog table (server component)
 
 app/api/generate/route.ts      — rate limit → Claude API → inject warmup/cooldown → return plan
 app/api/community/save         — rate limit → insert to Supabase
@@ -165,31 +181,35 @@ app/api/aqi                    — server-side WAQI proxy
 lib/config.ts                  — LIMITS (generation cap, share cap, max tokens)
 lib/workout-templates.ts       — 8 static warmup/cooldown templates (4 targets × 2 levels)
 lib/supabase.ts                — Supabase client
+updatelog.md                   — changelog source; add a row here after every deployment
 ```
 
 ### Key design decisions
 
-- **Similar plans first** — StepFour "Find Similar Plans" queries community before calling Claude. If matching plans exist (same target + level + ±2 weeks), user can use one directly (saves AI cost entirely). If none found, goes straight to generation.
-- **Warmup/cooldown server-injected** — Claude does not generate warmup or cooldown sessions. The generate route strips any it hallucinates and injects the appropriate static template after parsing, saving ~10–20% output tokens.
+- **Similar plans first** — StepFour "Find Similar Plans" queries community before calling Claude. If matching plans exist (same target + level + ±2 weeks), user can use one directly (saves AI cost entirely). If none found, a popup asks the user to confirm before generating.
+- **No descriptions in prompt** — Claude does not generate description text for any session type. Run sessions show pace, distance, zone, and effort chips only. Exercises show name + sets×reps. Saves ~25–35% output tokens.
+- **Warmup/cooldown server-injected** — Claude does not generate warmup or cooldown sessions. The generate route strips any it hallucinates and injects the appropriate static template after parsing, saving a further ~10–20% output tokens.
 - **All limits in `lib/config.ts`** — `PLAN_GENERATIONS_PER_IP`, `COMMUNITY_SHARES_PER_DAY`, `MAX_OUTPUT_TOKENS` are all in one place.
 - **Rate limit table dual-purpose** — `share_rate_limit` stores both plan generation rows (`ip = "generate:{ip}"`, no date filter, lifetime count) and sharing rows (`ip = "{ip}"`, date-filtered, resets daily).
-- **`PlanExportView`** — dedicated off-screen component at fixed 800px with all inline styles for reliable PNG capture via `html-to-image`.
+- **`PlanExportView`** — dedicated off-screen component at fixed 800px with all inline styles for reliable PNG capture via `html-to-image`. Renders identically to the on-screen view.
 - **All app state in `page.tsx`** — steps, form fields, plan result, similar plans, modals.
+- **Days always Mon→Sun** — `sortDays()` in `page.tsx` ensures `selectedDays` is always sorted; community `run_days` sorted at display time in `CommunityPlanModal`.
+- **Updates page from file** — `/updates` is a Next.js server component that reads `updatelog.md` with `fs.readFileSync` at build time and parses the markdown table. Add a row to `updatelog.md` and redeploy to update the changelog.
 
 ---
 
 ## Cost Estimate (claude-sonnet-4-6)
 
-Realistic plans use 750–3,500 output tokens (warmup/cooldown excluded from AI output).
+Descriptions removed from prompt → realistic plans now use ~500–2,500 output tokens.
 
 | Scenario | Output tokens | Cost/call |
 |---|---|---|
-| Min — Fun Run, 4w, 3 days | ~750 | ~$0.013 |
-| Typical — Half Marathon, 16w, 5 days | ~2,500 | ~$0.041 |
-| Max realistic — Full Marathon, 30w, 7 days | ~3,200 | ~$0.050 |
+| Min — Fun Run, 4w, 3 days | ~500 | ~$0.008 |
+| Typical — Half Marathon, 16w, 5 days | ~1,800 | ~$0.027 |
+| Max realistic — Full Marathon, 30w, 7 days | ~2,300 | ~$0.035 |
 | Token limit hit (14k cap) | 14,000 | ~$0.213 |
 
-Per user (3 lifetime generations): **$0.04 – $0.64** depending on plan complexity.
+Per user (3 lifetime generations): **$0.02 – $0.45** depending on plan complexity.
 
 ---
 
@@ -201,3 +221,4 @@ Per user (3 lifetime generations): **$0.04 – $0.64** depending on plan complex
 2. Set environment variables in Vercel dashboard → Settings → Environment Variables:
    `ANTHROPIC_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `WAQI_TOKEN`
 3. No server config needed — API routes run as serverless functions automatically
+4. After adding entries to `updatelog.md`, push to `main` to trigger a redeploy so `/updates` reflects the new entries

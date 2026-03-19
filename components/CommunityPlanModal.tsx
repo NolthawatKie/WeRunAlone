@@ -4,6 +4,10 @@ import { useRef, useState } from 'react';
 import type { TrainingPlan, Phase, Day, Session } from '@/types/plan';
 import PlanExportView, { type PlanExportMeta } from './PlanExportView';
 
+const DAY_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const sortDays = (days: string[]) =>
+  [...days].sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b));
+
 // ─── Reused style maps (mirrors OutputPlan.tsx) ───────────────────────────────
 
 const SESSION_STYLES: Record<string, { bg: string; ring: string; dot: string; label: string }> = {
@@ -69,22 +73,25 @@ function SessionCard({ session }: { session: Session }) {
           {session.pace && <span className="text-xs bg-blue-100 text-blue-800 ring-1 ring-inset ring-blue-300 px-2 py-0.5 rounded-full font-semibold">🏃 {session.pace}</span>}
         </div>
       )}
-      {session.description && <p className="text-xs text-slate-500 leading-relaxed">{session.description}</p>}
       {(session.type === 'plyometrics' || session.type === 'strength') && session.exercises && session.exercises.length > 0 && (
-        <div className="mt-2 space-y-1.5">
+        <div className="mt-2 space-y-1">
           {session.exercises.map((ex, idx) => {
             const isStrength = session.type === 'strength';
             return (
-              <div key={idx} className={`flex items-start gap-2 text-xs rounded-lg px-2.5 py-2 ring-1 ring-inset ${isStrength ? 'bg-violet-50 ring-violet-200' : 'bg-yellow-50 ring-yellow-200'}`}>
-                <span className={`mt-0.5 flex-shrink-0 ${isStrength ? 'text-violet-500' : 'text-yellow-600'}`}>•</span>
-                <div className="flex-1 min-w-0">
-                  <span className={`font-medium ${isStrength ? 'text-violet-800' : 'text-yellow-800'}`}>{ex.name}</span>
-                  <span className={`ml-2 ${isStrength ? 'text-violet-500' : 'text-yellow-600'}`}>{ex.sets} × {ex.reps} reps</span>
-                  {ex.note && <p className={`mt-0.5 leading-relaxed ${isStrength ? 'text-violet-500' : 'text-yellow-600'}`}>{ex.note}</p>}
-                </div>
+              <div key={idx} className={`text-xs ${isStrength ? 'text-violet-700' : 'text-yellow-700'}`}>
+                • {ex.name} {ex.sets}×{ex.reps}
               </div>
             );
           })}
+        </div>
+      )}
+      {(session.type === 'warmup' || session.type === 'cooldown') && session.exercises && session.exercises.length > 0 && (
+        <div className="mt-1.5 space-y-1">
+          {session.exercises.map((ex, idx) => (
+            <div key={idx} className="text-xs text-emerald-700">
+              • {ex.name} {ex.sets}×{ex.reps}{ex.note && <span className="text-emerald-500 ml-1">{ex.note}</span>}
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -161,7 +168,7 @@ export default function CommunityPlanModal({ plan, planName, sharedBy, target, l
     ...(weeks   ? [{ icon: '📆', text: `${weeks} weeks` }] : []),
     ...(level   ? [{ icon: level === 'beginner' ? '🌱' : '⚡', text: level === 'beginner' ? 'Beginner' : 'Experienced' }] : []),
     ...(hrMax   ? [{ icon: '❤️', text: `HR Max ${hrMax} bpm` }] : []),
-    ...(runDays && runDays.length > 0 ? [{ icon: '📅', text: runDays.join(', ') }] : []),
+    ...(runDays && runDays.length > 0 ? [{ icon: '📅', text: sortDays(runDays).join(', ') }] : []),
   ];
 
   const handleExport = async () => {
@@ -270,7 +277,7 @@ export default function CommunityPlanModal({ plan, planName, sharedBy, target, l
                 {level && <><span className="text-slate-300">·</span><span>{level === 'beginner' ? '🌱 Beginner' : '⚡ Experienced'}</span></>}
                 {hrMax && <><span className="text-slate-300">·</span><span>❤️ HR Max {hrMax} bpm</span></>}
                 {runDays && runDays.length > 0 && (
-                  <><span className="text-slate-300">·</span><span>🗓️ {runDays.join(', ')}</span></>
+                  <><span className="text-slate-300">·</span><span>🗓️ {sortDays(runDays).join(', ')}</span></>
                 )}
               </div>
 

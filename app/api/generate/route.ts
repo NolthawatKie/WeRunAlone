@@ -111,8 +111,8 @@ function getPaceZones(racePaceMinKm: string): PaceZones {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function injectWarmupCooldown(plan: any, template: { warmup: unknown[]; cooldown: unknown[] }): any {
   const INTENSE = new Set(['Tempo Run', 'Interval Run', 'Hill Repeat']);
-  const warmupSess = { type: 'warmup', duration: 10, exercises: template.warmup, description: 'Dynamic warm-up to prepare muscles and joints' };
-  const cooldownSess = { type: 'cooldown', duration: 10, exercises: template.cooldown, description: 'Static stretching to aid recovery' };
+  const warmupSess = { type: 'warmup', duration: 10, exercises: template.warmup };
+  const cooldownSess = { type: 'cooldown', duration: 10, exercises: template.cooldown };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   plan.phases = (plan.phases ?? []).map((phase: any) => {
@@ -264,7 +264,6 @@ export async function POST(request: NextRequest) {
               type: 'run', runType: 'Easy Run',
               distance: exEasyRun, duration: exEasyDuration,
               pace: exEasyPace, zone: 'Zone 2', effort: '60–70% HRmax',
-              description: 'Conversational pace — you should be able to hold a full conversation',
             }],
           },
           {
@@ -273,9 +272,9 @@ export async function POST(request: NextRequest) {
             sessions: [{
               type: 'strength', duration: 40,
               exercises: [
-                { name: 'Goblet Squat',   sets: 3, reps: 12, note: 'Chest up, depth below parallel' },
-                { name: 'Hip Thrust',     sets: 3, reps: 15, note: 'Drive through heels, full hip extension' },
-                { name: 'Single-Leg Deadlift', sets: 3, reps: 10, note: 'Hinge at hips, keep back flat' },
+                { name: 'Goblet Squat',        sets: 3, reps: 12 },
+                { name: 'Hip Thrust',          sets: 3, reps: 15 },
+                { name: 'Single-Leg Deadlift', sets: 3, reps: 10 },
               ],
             }],
           },
@@ -324,7 +323,7 @@ DAILY RULES:
 - Weekly balance: ${balance}
 - Do NOT include warmup or cooldown session types — omit them entirely
 - Rest day format: { "dayName": "...", "type": "rest", "sessions": [] }
-- Strength/plyometrics sessions must always list 4–6 exercises with sets, reps, and notes
+- Strength/plyometrics sessions must always list 4–6 exercises with sets and reps only (no notes)
 
 RUN TYPES (use exact spelling — no other values allowed):
 "Easy Run" | "Long Run" | "Tempo Run" | "Interval Run" | "Hill Repeat"
@@ -336,10 +335,10 @@ PLYOMETRICS exercises (pick 4–6 per session):
 Squat Jump, Box Jump, Burpee, Lunge Jump, Lateral Bound, Tuck Jump, Broad Jump, Single-Leg Hop, Skater Jump, Depth Jump
 
 QUALITY STANDARDS:
-- Every run session MUST have: distance (km), duration (min), pace, zone, effort description
+- Every run session MUST have: distance (km), duration (min), pace, zone, effort — NO description field
 - Long runs must reach the phase target km — do not truncate them
 - Tempo/Interval/Hill sessions must be meaningfully harder than Easy Runs (shorter distance, faster pace)
-- Descriptions must be specific coaching cues, not generic text
+- Do NOT add any description field to any session type
 
 OUTPUT: Pure JSON only. No markdown. No text before or after. Schema:
 ${exJson}

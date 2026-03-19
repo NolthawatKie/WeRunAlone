@@ -6,53 +6,73 @@ import WeatherWidget from './WeatherWidget';
 const RUN_TYPES = [
   {
     name: 'Easy Run',
-    color: 'border-emerald-200 bg-emerald-50',
+    border: 'border-l-emerald-400',
+    bg: 'bg-emerald-50',
     dot: 'bg-emerald-500',
     labelColor: 'text-emerald-700',
+    badgeBg: 'bg-emerald-100 text-emerald-700',
     zone: 'Zone 1–2',
     heart: '60–70% HRmax',
-    summary: 'Conversational pace — you can hold a full sentence.',
-    use: 'Recovery, base building, long aerobic sessions',
+    summary: 'The most common session in your plan. Run slow enough that you can hold a full conversation without gasping — if it feels embarrassingly slow, it\'s probably right.',
+    feeling: 'You should feel like you could run much further. Nasal breathing is possible. Never breathless.',
+    builds: 'Aerobic base, fat metabolism efficiency, active recovery between hard sessions. The majority of your weekly kilometres should be Easy Runs.',
+    tip: '💡 Most runners run easy days too fast. Slowing down here is what makes hard days actually hard — and keeps you injury-free.',
   },
   {
     name: 'Long Run',
-    color: 'border-sky-200 bg-sky-50',
+    border: 'border-l-sky-400',
+    bg: 'bg-sky-50',
     dot: 'bg-sky-500',
     labelColor: 'text-sky-700',
+    badgeBg: 'bg-sky-100 text-sky-700',
     zone: 'Zone 2',
     heart: '65–75% HRmax',
-    summary: 'Slow & steady — the cornerstone of endurance.',
-    use: 'Weekly longest run, builds aerobic capacity',
+    summary: 'Your longest run of the week — done at a relaxed, steady pace, slower than race pace. Distance increases gradually each phase to build your endurance ceiling.',
+    feeling: 'Comfortable but purposeful. You should finish tired but not destroyed. If you\'re struggling in the last 20%, slow down.',
+    builds: 'Mitochondrial density, glycogen storage capacity, fat-burning efficiency, and the mental resilience to keep going when tired.',
+    tip: '💡 Run it too fast and you turn a base-building session into junk miles. The goal is time on feet, not speed.',
   },
   {
     name: 'Tempo Run',
-    color: 'border-orange-200 bg-orange-50',
+    border: 'border-l-orange-400',
+    bg: 'bg-orange-50',
     dot: 'bg-orange-500',
     labelColor: 'text-orange-700',
+    badgeBg: 'bg-orange-100 text-orange-700',
     zone: 'Zone 3–4',
     heart: '80–90% HRmax',
-    summary: '"Comfortably hard" — tough but sustainable for 20–40 min.',
-    use: 'Raises lactate threshold, improves race pace',
+    summary: '"Comfortably hard" — the pace you could sustain for roughly one hour in a race. Typically done for 20–40 continuous minutes after a warm-up.',
+    feeling: 'You can speak a few words but not hold a conversation. Breathing is rhythmic and controlled. It hurts, but it\'s sustainable.',
+    builds: 'Lactate threshold — the point where lactic acid accumulates faster than your body can clear it. A higher threshold means a faster race pace.',
+    tip: '💡 This is the most direct training signal for race performance. Getting comfortable at this effort directly translates to running your goal distance faster.',
   },
   {
     name: 'Interval Run',
-    color: 'border-red-200 bg-red-50',
+    border: 'border-l-red-400',
+    bg: 'bg-red-50',
     dot: 'bg-red-500',
     labelColor: 'text-red-700',
+    badgeBg: 'bg-red-100 text-red-700',
     zone: 'Zone 4–5',
     heart: '90–100% HRmax',
-    summary: 'Short fast bursts with recovery — e.g. 400 m × 6 reps.',
-    use: 'Boosts VO₂max, speed, and running economy',
+    summary: 'Short, very fast repetitions with full recovery between each. A typical session might be 400 m × 6–8 reps, or 1 km × 4 reps with 90 s rest.',
+    feeling: 'Each rep should feel hard enough that you need to focus on form. Breathing is laboured. The last rep should feel as hard as the first.',
+    builds: 'VO₂max (your body\'s maximum oxygen uptake), running economy, leg speed, and fast-twitch muscle recruitment.',
+    tip: '💡 The recovery between reps is part of the session — don\'t cut it short. Full recovery lets you run each rep at true quality, which is the whole point.',
   },
   {
     name: 'Hill Repeat',
-    color: 'border-purple-200 bg-purple-50',
+    border: 'border-l-purple-400',
+    bg: 'bg-purple-50',
     dot: 'bg-purple-500',
     labelColor: 'text-purple-700',
+    badgeBg: 'bg-purple-100 text-purple-700',
     zone: 'Zone 4',
     heart: '85–95% HRmax',
-    summary: 'Sprint uphill 60–90 s × 6–8 reps, jog down to recover.',
-    use: 'Builds leg power, form, and injury resilience',
+    summary: 'Sprint hard uphill for 60–90 seconds, then jog slowly back down to recover. Repeat 6–8 times. A short but brutally effective session.',
+    feeling: 'Legs burn on the way up, controlled and easy on the way down. Drive your arms, shorten your stride, stay tall.',
+    builds: 'Glute and calf power, running form under fatigue, injury resilience (less impact than flat sprints), and mental toughness.',
+    tip: '💡 Hills are speed work in disguise. The incline forces good mechanics and reduces ground impact — making it safer and more effective than flat sprinting.',
   },
 ];
 
@@ -154,24 +174,37 @@ export default function LandingPage({ onStart }: LandingPageProps) {
       {/* Run Types */}
       <section>
         <h2 className="text-xl font-semibold text-slate-900 mb-1">Run types explained</h2>
-        <p className="text-sm text-slate-500 mb-6">Your plan uses the right mix based on your goal and training phase</p>
-        <div className="space-y-2.5">
+        <p className="text-sm text-slate-500 mb-6">Your plan mixes these based on your goal and training phase — here&apos;s what each one means and why it matters</p>
+        <div className="space-y-4">
           {RUN_TYPES.map((rt) => (
-            <div key={rt.name} className={`rounded-xl border p-4 ${rt.color}`}>
-              <div className="flex items-start gap-4">
-                <div className="flex items-center gap-2 w-36 flex-shrink-0 mt-0.5">
-                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${rt.dot}`} />
-                  <span className={`font-semibold text-sm ${rt.labelColor}`}>{rt.name}</span>
+            <div key={rt.name} className={`rounded-xl border border-slate-200 border-l-4 ${rt.border} ${rt.bg} p-5`}>
+              {/* Header */}
+              <div className="flex items-center gap-3 mb-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${rt.dot}`} />
+                  <span className={`font-bold text-sm ${rt.labelColor}`}>{rt.name}</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-700 leading-snug">{rt.summary}</p>
-                  <p className="text-xs text-slate-400 mt-1">{rt.use}</p>
+                <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${rt.badgeBg}`}>{rt.zone}</span>
+                <span className="text-xs text-slate-400">{rt.heart}</span>
+              </div>
+
+              {/* Summary */}
+              <p className="text-sm text-slate-700 leading-relaxed mb-3">{rt.summary}</p>
+
+              {/* Grid: feeling + builds */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                <div className="bg-white/60 rounded-lg px-3 py-2.5">
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">How it feels</div>
+                  <p className="text-xs text-slate-600 leading-relaxed">{rt.feeling}</p>
                 </div>
-                <div className="text-right flex-shrink-0 hidden sm:block">
-                  <div className={`text-xs font-medium ${rt.labelColor}`}>{rt.zone}</div>
-                  <div className="text-xs text-slate-400 mt-0.5">{rt.heart}</div>
+                <div className="bg-white/60 rounded-lg px-3 py-2.5">
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">What it builds</div>
+                  <p className="text-xs text-slate-600 leading-relaxed">{rt.builds}</p>
                 </div>
               </div>
+
+              {/* Tip */}
+              <p className={`text-xs leading-relaxed ${rt.labelColor} opacity-80`}>{rt.tip}</p>
             </div>
           ))}
         </div>

@@ -65,33 +65,14 @@ function SessionCard({ session }: { session: Session }) {
         </div>
       )}
 
-      {/* Description */}
-      {session.description && (
-        <p className="text-xs text-slate-500 leading-relaxed">{session.description}</p>
-      )}
-
       {/* Strength / Plyometrics exercises */}
       {(session.type === 'plyometrics' || session.type === 'strength') && session.exercises && session.exercises.length > 0 && (
-        <div className="mt-2 space-y-1.5">
+        <div className="mt-2 space-y-1">
           {session.exercises.map((ex, idx) => {
             const isStrength = session.type === 'strength';
             return (
-              <div
-                key={idx}
-                className={`flex items-start gap-2 text-xs rounded-lg px-2.5 py-2 ring-1 ring-inset ${
-                  isStrength
-                    ? 'bg-violet-50 ring-violet-200'
-                    : 'bg-yellow-50 ring-yellow-200'
-                }`}
-              >
-                <span className={`mt-0.5 flex-shrink-0 ${isStrength ? 'text-violet-500' : 'text-yellow-600'}`}>•</span>
-                <div className="flex-1 min-w-0">
-                  <span className={`font-medium ${isStrength ? 'text-violet-800' : 'text-yellow-800'}`}>{ex.name}</span>
-                  <span className={`ml-2 ${isStrength ? 'text-violet-500' : 'text-yellow-600'}`}>
-                    {ex.sets} × {ex.reps} reps
-                  </span>
-                  {ex.note && <p className={`mt-0.5 leading-relaxed ${isStrength ? 'text-violet-500' : 'text-yellow-600'}`}>{ex.note}</p>}
-                </div>
+              <div key={idx} className={`text-xs ${isStrength ? 'text-violet-700' : 'text-yellow-700'}`}>
+                • {ex.name} {ex.sets}×{ex.reps}
               </div>
             );
           })}
@@ -103,7 +84,7 @@ function SessionCard({ session }: { session: Session }) {
         <div className="mt-1.5 space-y-1">
           {session.exercises.map((ex, idx) => (
             <div key={idx} className="text-xs text-emerald-700">
-              • {ex.name} — {ex.sets}×{ex.reps}{ex.note && <span className="text-emerald-500 ml-1">({ex.note})</span>}
+              • {ex.name} {ex.sets}×{ex.reps}{ex.note && <span className="text-emerald-500 ml-1">{ex.note}</span>}
             </div>
           ))}
         </div>
@@ -241,7 +222,9 @@ export default function OutputPlan({ plan, formSummary, onReset }: OutputPlanPro
     setTimeout(() => setToast(null), 3500);
   };
 
-  const handleShare = async (sharedBy: string) => {
+  const handleShare = async (customPlanName: string, sharedBy: string) => {
+    // Keep plan_data.planName in sync with the user-chosen name
+    const planDataToSave = { ...plan, planName: customPlanName };
     const res = await fetch('/api/community/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -251,8 +234,8 @@ export default function OutputPlan({ plan, formSummary, onReset }: OutputPlanPro
         weeks: formSummary.weeks,
         run_days: formSummary.days,
         hr_max: formSummary.hrMax,
-        plan_data: plan,
-        plan_name: plan.planName,
+        plan_data: planDataToSave,
+        plan_name: customPlanName,
         shared_by: sharedBy,
       }),
     });

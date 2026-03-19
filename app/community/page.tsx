@@ -143,14 +143,20 @@ export default function CommunityPage() {
             <span className="text-lg">🏃</span>
             <span className="font-bold text-slate-900 text-base hover:text-blue-600">WeRunAlone</span>
           </Link>
-          <span className="text-slate-300">·</span>
-          <span className="text-sm text-slate-500">Community Plans</span>
-          <div className="ml-auto flex items-center gap-3">
-            <WeatherNavBadge />
-            <Link href="/" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
-              ← Home
+          <nav className="flex items-center gap-1 ml-auto">
+            <Link href="/community" className="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-50 text-blue-600 transition-colors">
+              Community
             </Link>
-          </div>
+            <Link href="/about" className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              About
+            </Link>
+            <Link href="/updates" className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              Updates
+            </Link>
+            <div className="ml-1">
+              <WeatherNavBadge />
+            </div>
+          </nav>
         </div>
       </header>
 
