@@ -161,8 +161,26 @@ export default function CommunityPlanModal({ plan, planName, sharedBy, target, l
         backgroundColor: '#f8fafc',
         pixelRatio: 2,
       });
+      const fileName = `WeRunAlone-${planName.replace(/\s+/g, '-')}.png`;
+
+      // Try Web Share API (works on mobile Safari/Chrome)
+      if (navigator.share && navigator.canShare) {
+        try {
+          const res = await fetch(dataUrl);
+          const blob = await res.blob();
+          const file = new File([blob], fileName, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: planName });
+            return;
+          }
+        } catch {
+          // Share was cancelled or failed — fall through to download
+        }
+      }
+
+      // Desktop: trigger download
       const link = document.createElement('a');
-      link.download = `WeRunAlone-${planName.replace(/\s+/g, '-')}.png`;
+      link.download = fileName;
       link.href = dataUrl;
       link.click();
     } catch (err) {
@@ -189,13 +207,13 @@ export default function CommunityPlanModal({ plan, planName, sharedBy, target, l
           <button
             onClick={handleExport}
             disabled={exporting}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer transition-all ${
-              exporting ? 'bg-slate-200 text-slate-400' : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500'
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer ${
+              exporting ? 'bg-slate-100 text-slate-400' : 'bg-blue-600 hover:bg-blue-700 text-white'
             }`}
           >
             {exporting ? (
               <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Saving...</>
-            ) : <>💾 Save as Image</>}
+            ) : <>Save as Image</>}
           </button>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition cursor-pointer">
             ✕

@@ -45,13 +45,11 @@ function timeAgo(iso: string) {
 function PlanCard({
   plan,
   onView,
-  onDownload,
-  downloading,
+  loading,
 }: {
   plan: CommunityPlan;
   onView: () => void;
-  onDownload: () => void;
-  downloading: boolean;
+  loading: boolean;
 }) {
   const levelLabel = plan.level === 'beginner' ? '🌱 Beginner' : '⚡ Experienced';
   const levelColor = plan.level === 'beginner'
@@ -59,38 +57,30 @@ function PlanCard({
     : 'bg-orange-50 text-orange-700 ring-orange-200';
 
   return (
-    <div className="bg-white rounded-2xl ring-1 ring-inset ring-slate-200 shadow-sm p-5 flex flex-col gap-3">
+    <div className="bg-white rounded-xl border border-slate-200 p-5 flex flex-col gap-3">
       <div>
-        <h3 className="font-bold text-slate-900 text-sm leading-snug mb-2 line-clamp-2">{plan.plan_name}</h3>
+        <h3 className="font-semibold text-slate-900 text-sm leading-snug mb-2 line-clamp-2">{plan.plan_name}</h3>
         <div className="flex flex-wrap gap-1.5">
-          <span className="text-xs ring-1 ring-inset ring-blue-200 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">{plan.target}</span>
-          <span className={`text-xs ring-1 ring-inset px-2 py-0.5 rounded-full ${levelColor}`}>{levelLabel}</span>
-          <span className="text-xs ring-1 ring-inset ring-slate-200 bg-slate-50 text-slate-600 px-2 py-0.5 rounded-full">📆 {plan.weeks}w</span>
+          <span className="text-xs border border-blue-200 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md">{plan.target}</span>
+          <span className={`text-xs border px-2 py-0.5 rounded-md ${levelColor}`}>{levelLabel}</span>
+          <span className="text-xs border border-slate-200 bg-slate-50 text-slate-500 px-2 py-0.5 rounded-md">{plan.weeks}w</span>
         </div>
       </div>
 
       <div className="flex items-center gap-3 text-xs text-slate-400 mt-auto">
-        <span>👤 {plan.shared_by ?? 'Anonymous Runner'}</span>
+        <span>{plan.shared_by ?? 'Anonymous Runner'}</span>
         <span>·</span>
-        <span>⬇️ {plan.download_count}</span>
+        <span>{plan.download_count} saves</span>
         <span className="ml-auto">{timeAgo(plan.created_at)}</span>
       </div>
 
-      <div className="flex gap-2">
-        <button
-          onClick={onView}
-          className="flex-1 px-3 py-2 rounded-xl text-xs font-semibold ring-1 ring-inset ring-slate-300 text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-        >
-          👁️ View Plan
-        </button>
-        <button
-          onClick={onDownload}
-          disabled={downloading}
-          className="flex-1 px-3 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500 transition cursor-pointer disabled:opacity-60"
-        >
-          {downloading ? '…' : '⬇️ Download'}
-        </button>
-      </div>
+      <button
+        onClick={onView}
+        disabled={loading}
+        className="w-full px-3 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer disabled:opacity-60"
+      >
+        {loading ? '…' : 'View Plan'}
+      </button>
     </div>
   );
 }
@@ -107,9 +97,6 @@ export default function CommunityPage() {
   // Modal
   const [viewPlan, setViewPlan] = useState<FullCommunityPlan | null>(null);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-
-  // Download
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPlans();
@@ -147,53 +134,21 @@ export default function CommunityPage() {
     }
   };
 
-  const handleDownload = async (plan: CommunityPlan) => {
-    setDownloadingId(plan.id);
-    try {
-      const res = await fetch(`/api/community/download/${plan.id}`, { method: 'POST' });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Download failed');
-
-      // Export PNG using html-to-image on a hidden element
-      const { toPng } = await import('html-to-image');
-      const container = document.createElement('div');
-      container.style.cssText = 'position:fixed;left:-9999px;top:0;width:1200px;background:#f8fafc;';
-      document.body.appendChild(container);
-
-      // Render minimal plan info to PNG
-      const planData: TrainingPlan = data.plan_data;
-      container.innerHTML = `
-        <div style="padding:32px;font-family:sans-serif;background:#f8fafc;min-height:100px">
-          <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">WeRunAlone Community Plan</p>
-          <h1 style="font-size:24px;font-weight:800;color:#0f172a;margin-bottom:4px">${planData.planName}</h1>
-          <p style="font-size:13px;color:#64748b">${planData.totalWeeks} weeks · Shared by ${plan.shared_by ?? 'Anonymous Runner'}</p>
-        </div>`;
-
-      // Use the modal's planRef approach — open modal then export
-      // Instead, directly open modal which has export built in
-      setViewPlan({ ...plan, plan_data: planData });
-    } catch (e) {
-      alert(e instanceof Error ? e.message : 'Download failed');
-    } finally {
-      setDownloadingId(null);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-sm shadow-[inset_0_-1px_0_#e2e8f0] sticky top-0 z-20">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-xl">🏃</span>
-            <span className="font-bold text-slate-900 text-lg tracking-tight group-hover:text-blue-600 transition-colors">WeRunAlone</span>
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-lg">🏃</span>
+            <span className="font-bold text-slate-900 text-base hover:text-blue-600">WeRunAlone</span>
           </Link>
           <span className="text-slate-300">·</span>
-          <span className="text-sm font-semibold text-slate-600">Community Plans</span>
+          <span className="text-sm text-slate-500">Community Plans</span>
           <div className="ml-auto flex items-center gap-3">
             <WeatherNavBadge />
-            <Link href="/" className="text-xs text-blue-600 hover:text-blue-500 font-medium transition">
-              ← Home Page
+            <Link href="/" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+              ← Home
             </Link>
           </div>
         </div>
@@ -207,7 +162,7 @@ export default function CommunityPage() {
         </div>
 
         {/* Filter bar */}
-        <div className="bg-white rounded-2xl ring-1 ring-inset ring-slate-200 p-4 mb-6 flex flex-wrap gap-3 items-center">
+        <div className="bg-white rounded-xl border border-slate-200 p-4 mb-6 flex flex-wrap gap-3 items-center">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Filter</span>
 
           <select
@@ -275,8 +230,7 @@ export default function CommunityPage() {
                 key={plan.id}
                 plan={plan}
                 onView={() => handleView(plan.id)}
-                onDownload={() => handleDownload(plan)}
-                downloading={downloadingId === plan.id || loadingPlan === plan.id}
+                loading={loadingPlan === plan.id}
               />
             ))}
           </div>

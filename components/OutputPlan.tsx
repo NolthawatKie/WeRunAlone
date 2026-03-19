@@ -257,8 +257,26 @@ export default function OutputPlan({ plan, formSummary, onReset }: OutputPlanPro
         backgroundColor: '#f8fafc',
         pixelRatio: 2,
       });
+      const fileName = `WeRunAlone-${plan.planName.replace(/\s+/g, '-')}.png`;
+
+      // Try Web Share API (works on mobile Safari/Chrome)
+      if (navigator.share && navigator.canShare) {
+        try {
+          const res = await fetch(dataUrl);
+          const blob = await res.blob();
+          const file = new File([blob], fileName, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: plan.planName });
+            return;
+          }
+        } catch {
+          // Share was cancelled or failed — fall through to download
+        }
+      }
+
+      // Desktop: trigger download
       const link = document.createElement('a');
-      link.download = `WeRunAlone-${plan.planName.replace(/\s+/g, '-')}.png`;
+      link.download = fileName;
       link.href = dataUrl;
       link.click();
     } catch (err) {
@@ -275,30 +293,30 @@ export default function OutputPlan({ plan, formSummary, onReset }: OutputPlanPro
       <div className="flex items-center gap-3 mb-6 sticky top-4 z-10">
         <button
           onClick={onReset}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-600 hover:text-slate-900 hover:border-slate-400 text-sm font-medium cursor-pointer transition-all shadow-sm"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-slate-300 text-sm font-medium cursor-pointer"
         >
           ← New Plan
         </button>
         <button
           onClick={handleExport}
           disabled={exporting}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-all ml-auto ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer ml-auto ${
             exporting
-              ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-              : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-lg shadow-blue-500/20'
+              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-700 text-white'
           }`}
         >
           {exporting ? (
             <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Saving...</>
           ) : (
-            <>💾 Save as Image</>
+            <>Save as Image</>
           )}
         </button>
         <button
           onClick={() => setShowShareModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-all bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white"
         >
-          🌍 Share to Community
+          Share to Community
         </button>
       </div>
 

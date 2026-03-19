@@ -6,7 +6,7 @@ import WeatherWidget from './WeatherWidget';
 const RUN_TYPES = [
   {
     name: 'Easy Run',
-    color: 'border-emerald-300 bg-emerald-50',
+    color: 'border-emerald-200 bg-emerald-50',
     dot: 'bg-emerald-500',
     labelColor: 'text-emerald-700',
     zone: 'Zone 1–2',
@@ -16,7 +16,7 @@ const RUN_TYPES = [
   },
   {
     name: 'Long Run',
-    color: 'border-sky-300 bg-sky-50',
+    color: 'border-sky-200 bg-sky-50',
     dot: 'bg-sky-500',
     labelColor: 'text-sky-700',
     zone: 'Zone 2',
@@ -26,7 +26,7 @@ const RUN_TYPES = [
   },
   {
     name: 'Tempo Run',
-    color: 'border-orange-300 bg-orange-50',
+    color: 'border-orange-200 bg-orange-50',
     dot: 'bg-orange-500',
     labelColor: 'text-orange-700',
     zone: 'Zone 3–4',
@@ -36,7 +36,7 @@ const RUN_TYPES = [
   },
   {
     name: 'Interval Run',
-    color: 'border-red-300 bg-red-50',
+    color: 'border-red-200 bg-red-50',
     dot: 'bg-red-500',
     labelColor: 'text-red-700',
     zone: 'Zone 4–5',
@@ -46,7 +46,7 @@ const RUN_TYPES = [
   },
   {
     name: 'Hill Repeat',
-    color: 'border-purple-300 bg-purple-50',
+    color: 'border-purple-200 bg-purple-50',
     dot: 'bg-purple-500',
     labelColor: 'text-purple-700',
     zone: 'Zone 4',
@@ -61,8 +61,7 @@ const RACE_GOALS = [
     icon: '🏃',
     name: 'Fun Run',
     distance: '5 km',
-    accent: 'border-emerald-300',
-    bg: 'bg-emerald-50',
+    borderColor: 'border-emerald-200',
     weeks: '4–12 weeks',
     desc: 'Perfect entry point. Short enough to be accessible, long enough to feel proud.',
     training: 'Easy Run · Light Strength · 3 days/week',
@@ -71,8 +70,7 @@ const RACE_GOALS = [
     icon: '🥈',
     name: 'Mini Marathon',
     distance: '10 km',
-    accent: 'border-blue-300',
-    bg: 'bg-blue-50',
+    borderColor: 'border-blue-200',
     weeks: '8–20 weeks',
     desc: 'The first real test of aerobic base. Demands consistency and some speed work.',
     training: 'Easy + Tempo · Strength · 3–4 days/week',
@@ -81,8 +79,7 @@ const RACE_GOALS = [
     icon: '🥇',
     name: 'Half Marathon',
     distance: '21.1 km',
-    accent: 'border-amber-300',
-    bg: 'bg-amber-50',
+    borderColor: 'border-amber-200',
     weeks: '12–24 weeks',
     desc: 'A serious distance that rewards structured training. Long runs are essential.',
     training: 'All run types · Strength + Plyo · 4–5 days/week',
@@ -91,8 +88,7 @@ const RACE_GOALS = [
     icon: '🏆',
     name: 'Full Marathon',
     distance: '42.2 km',
-    accent: 'border-rose-300',
-    bg: 'bg-rose-50',
+    borderColor: 'border-rose-200',
     weeks: '16–30 weeks',
     desc: 'The ultimate test. Requires a periodised plan, taper, and race-day strategy.',
     training: 'Full periodisation · Strength · 5+ days/week',
@@ -106,51 +102,50 @@ interface LandingPageProps {
 export default function LandingPage({ onStart }: LandingPageProps) {
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 space-y-20">
+
       {/* Hero */}
-      <section className="text-center space-y-6 pt-4">
-        <div className="inline-flex items-center gap-2 text-xs font-semibold text-blue-600 uppercase tracking-widest bg-blue-50 border border-blue-200 px-4 py-1.5 rounded-full">
-          AI-Powered Running Coach
-        </div>
-        <h1 className="text-5xl font-black text-slate-900 leading-tight tracking-tight">
-          Run solo, Run free.<br />
-          <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
-            We Run Alone.
-          </span>
+      <section className="pt-4 space-y-5">
+        <p className="text-sm text-blue-600 font-medium">Free training plans for runners</p>
+        <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 leading-tight max-w-2xl">
+          Run solo, run free.<br />
+          <span className="text-blue-600">We Run Alone.</span>
         </h1>
-        <p className="text-slate-600 text-lg max-w-xl mx-auto leading-relaxed">
-          WeRunAlone builds a personalised training plan — balancing runs, strength, and plyometrics — based on your goal and schedule.
+        <p className="text-slate-500 text-lg max-w-xl leading-relaxed">
+          Tell us your goal, your schedule, and your heart rate max — we'll build a plan that actually fits your life.
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 pt-1">
           <button
             onClick={onStart}
-            className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-base px-8 py-4 rounded-2xl shadow-xl shadow-blue-500/20 hover:scale-[1.03] active:scale-[0.98] transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-6 py-3 rounded-lg shadow-sm cursor-pointer"
           >
-            🏃 Build My Training Plan →
+            Build my plan →
           </button>
           <Link
             href="/community"
-            className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-base px-6 py-4 rounded-2xl ring-1 ring-inset ring-slate-200 hover:ring-slate-300 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-medium text-sm px-6 py-3 rounded-lg border border-slate-200 hover:border-slate-300"
           >
-            🌍 Explore Community Plans
+            Browse community plans
           </Link>
         </div>
+        <p className="text-xs text-slate-400">No account needed · takes about 2 minutes</p>
 
         <WeatherWidget />
       </section>
 
-      {/* Training Philosophy */}
+      {/* What's in a plan */}
       <section>
-        <h2 className="text-xl font-bold text-slate-900 mb-6 text-center">What goes into a complete plan</h2>
+        <h2 className="text-xl font-semibold text-slate-900 mb-1">What goes into a plan</h2>
+        <p className="text-sm text-slate-500 mb-6">Every plan balances three types of training</p>
         <div className="grid grid-cols-3 gap-4">
           {[
-            { icon: '🏃', color: 'bg-blue-50 border-blue-200', label: 'Running', desc: 'Aerobic base, speed, and endurance through varied run types' },
-            { icon: '🏋️', color: 'bg-violet-50 border-violet-200', label: 'Strength', desc: 'Injury prevention and power from runner-specific weight training' },
-            { icon: '⚡', color: 'bg-amber-50 border-amber-200', label: 'Plyometrics', desc: 'Running economy and explosive power through jump training' },
+            { icon: '🏃', label: 'Running', desc: 'Varied run types that build aerobic base, speed, and endurance over time.' },
+            { icon: '🏋️', label: 'Strength', desc: 'Runner-specific exercises to prevent injury and build power in the right muscles.' },
+            { icon: '⚡', label: 'Plyometrics', desc: 'Jump training that improves running economy and explosive stride.' },
           ].map((item) => (
-            <div key={item.label} className={`rounded-2xl border p-5 text-center ${item.color}`}>
-              <div className="text-4xl mb-3">{item.icon}</div>
-              <div className="font-bold text-slate-900 mb-2">{item.label}</div>
-              <div className="text-xs text-slate-600 leading-relaxed">{item.desc}</div>
+            <div key={item.label} className="bg-white border border-slate-200 rounded-xl p-5">
+              <div className="text-3xl mb-3">{item.icon}</div>
+              <div className="font-semibold text-slate-900 text-sm mb-1.5">{item.label}</div>
+              <div className="text-xs text-slate-500 leading-relaxed">{item.desc}</div>
             </div>
           ))}
         </div>
@@ -158,24 +153,22 @@ export default function LandingPage({ onStart }: LandingPageProps) {
 
       {/* Run Types */}
       <section>
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-slate-900">Run types explained</h2>
-          <p className="text-slate-500 text-sm mt-1">Your plan will use the right mix depending on your goal and phase</p>
-        </div>
-        <div className="space-y-3">
+        <h2 className="text-xl font-semibold text-slate-900 mb-1">Run types explained</h2>
+        <p className="text-sm text-slate-500 mb-6">Your plan uses the right mix based on your goal and training phase</p>
+        <div className="space-y-2.5">
           {RUN_TYPES.map((rt) => (
-            <div key={rt.name} className={`rounded-2xl border p-5 ${rt.color}`}>
+            <div key={rt.name} className={`rounded-xl border p-4 ${rt.color}`}>
               <div className="flex items-start gap-4">
-                <div className="flex items-center gap-2 w-40 flex-shrink-0 mt-0.5">
-                  <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${rt.dot}`} />
-                  <span className={`font-bold text-sm ${rt.labelColor}`}>{rt.name}</span>
+                <div className="flex items-center gap-2 w-36 flex-shrink-0 mt-0.5">
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${rt.dot}`} />
+                  <span className={`font-semibold text-sm ${rt.labelColor}`}>{rt.name}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-slate-700 leading-snug">{rt.summary}</p>
-                  <p className="text-xs text-slate-500 mt-1">{rt.use}</p>
+                  <p className="text-xs text-slate-400 mt-1">{rt.use}</p>
                 </div>
                 <div className="text-right flex-shrink-0 hidden sm:block">
-                  <div className={`text-xs font-semibold ${rt.labelColor}`}>{rt.zone}</div>
+                  <div className={`text-xs font-medium ${rt.labelColor}`}>{rt.zone}</div>
                   <div className="text-xs text-slate-400 mt-0.5">{rt.heart}</div>
                 </div>
               </div>
@@ -186,25 +179,21 @@ export default function LandingPage({ onStart }: LandingPageProps) {
 
       {/* Race Distances */}
       <section>
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-slate-900">Race distances</h2>
-          <p className="text-slate-500 text-sm mt-1">Pick one — your plan adapts to it automatically</p>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
+        <h2 className="text-xl font-semibold text-slate-900 mb-1">Pick your distance</h2>
+        <p className="text-sm text-slate-500 mb-6">Your plan adapts to the race you're training for</p>
+        <div className="grid grid-cols-2 gap-3">
           {RACE_GOALS.map((rg) => (
-            <div key={rg.name} className={`rounded-2xl border p-5 ${rg.accent} ${rg.bg}`}>
+            <div key={rg.name} className={`bg-white rounded-xl border ${rg.borderColor} p-5`}>
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-3xl">{rg.icon}</span>
+                <span className="text-2xl">{rg.icon}</span>
                 <div>
-                  <div className="font-bold text-slate-900">{rg.name}</div>
-                  <div className="text-xl font-black text-slate-700 leading-none">{rg.distance}</div>
+                  <div className="font-semibold text-slate-900 text-sm">{rg.name}</div>
+                  <div className="text-lg font-bold text-slate-700 leading-none">{rg.distance}</div>
                 </div>
-                <div className="ml-auto text-xs text-slate-500 text-right">
-                  {rg.weeks}
-                </div>
+                <div className="ml-auto text-xs text-slate-400">{rg.weeks}</div>
               </div>
               <p className="text-sm text-slate-600 leading-relaxed mb-2">{rg.desc}</p>
-              <p className="text-xs text-slate-500">{rg.training}</p>
+              <p className="text-xs text-slate-400">{rg.training}</p>
             </div>
           ))}
         </div>
@@ -212,67 +201,60 @@ export default function LandingPage({ onStart }: LandingPageProps) {
 
       {/* Example Plan Preview */}
       <section>
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-slate-900">What your plan looks like</h2>
-          <p className="text-slate-500 text-sm mt-1">Sample 12-week Mini Marathon (10 km) plan — Beginner</p>
-        </div>
+        <h2 className="text-xl font-semibold text-slate-900 mb-1">What the output looks like</h2>
+        <p className="text-sm text-slate-500 mb-6">Sample: 12-week Mini Marathon plan, beginner</p>
 
-        {/* Phase structure */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
           {[
-            { phase: 'Phase 1', name: 'Base Building', weeks: 'Weeks 1–4', color: 'border-l-blue-400', badge: 'bg-blue-50 text-blue-700 border-blue-200' },
-            { phase: 'Phase 2', name: 'Development',   weeks: 'Weeks 5–10', color: 'border-l-purple-400', badge: 'bg-purple-50 text-purple-700 border-purple-200' },
-            { phase: 'Phase 3', name: 'Taper & Race',  weeks: 'Weeks 11–12', color: 'border-l-emerald-400', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+            { phase: 'Phase 1', name: 'Base Building', weeks: 'Weeks 1–4', leftBorder: 'border-l-blue-400' },
+            { phase: 'Phase 2', name: 'Development',   weeks: 'Weeks 5–10', leftBorder: 'border-l-violet-400' },
+            { phase: 'Phase 3', name: 'Taper & Race',  weeks: 'Weeks 11–12', leftBorder: 'border-l-emerald-400' },
           ].map((p) => (
-            <div key={p.phase} className={`bg-white border border-slate-200 border-l-4 ${p.color} rounded-xl px-4 py-3`}>
-              <div className={`text-xs font-bold uppercase tracking-widest border px-2 py-0.5 rounded-full inline-block mb-1.5 ${p.badge}`}>{p.phase}</div>
+            <div key={p.phase} className={`bg-white border border-slate-200 border-l-4 ${p.leftBorder} rounded-xl px-4 py-3`}>
+              <div className="text-xs text-slate-400 mb-1">{p.phase}</div>
               <div className="font-semibold text-slate-900 text-sm">{p.name}</div>
               <div className="text-xs text-slate-400 mt-0.5">{p.weeks}</div>
             </div>
           ))}
         </div>
 
-        {/* Sample week pattern */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Sample week — Phase 1 (repeated 4 times)</span>
-          </div>
+        <div className="bg-white border border-slate-200 rounded-xl p-5">
+          <p className="text-xs text-slate-400 mb-4">Sample week (Phase 1 — repeats each week in the phase)</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { day: 'Monday',    type: 'Easy Run',  detail: '5 km · Zone 2',      color: 'bg-emerald-50 border-emerald-200', dot: 'bg-emerald-500', label: 'text-emerald-700' },
-              { day: 'Wednesday', type: 'Strength',  detail: '40 min · 5 exercises', color: 'bg-violet-50 border-violet-200',  dot: 'bg-violet-500',  label: 'text-violet-700' },
-              { day: 'Friday',    type: 'Easy Run',  detail: '6 km · Zone 2',      color: 'bg-emerald-50 border-emerald-200', dot: 'bg-emerald-500', label: 'text-emerald-700' },
-              { day: 'Sunday',    type: 'Long Run',  detail: '10 km · Zone 2',     color: 'bg-sky-50 border-sky-200',         dot: 'bg-sky-500',     label: 'text-sky-700'     },
+              { day: 'Monday',    type: 'Easy Run',  detail: '5 km · Zone 2',       border: 'border-emerald-200', dot: 'bg-emerald-500', label: 'text-emerald-700' },
+              { day: 'Wednesday', type: 'Strength',  detail: '40 min · 5 exercises', border: 'border-violet-200',  dot: 'bg-violet-500',  label: 'text-violet-700'  },
+              { day: 'Friday',    type: 'Easy Run',  detail: '6 km · Zone 2',       border: 'border-emerald-200', dot: 'bg-emerald-500', label: 'text-emerald-700' },
+              { day: 'Sunday',    type: 'Long Run',  detail: '10 km · Zone 2',      border: 'border-sky-200',     dot: 'bg-sky-500',     label: 'text-sky-700'     },
             ].map((item) => (
-              <div key={item.day} className={`rounded-xl border p-3 ${item.color}`}>
-                <div className="text-xs font-semibold text-slate-500 mb-2">{item.day}</div>
+              <div key={item.day} className={`rounded-lg border ${item.border} bg-white p-3`}>
+                <div className="text-xs text-slate-400 mb-2">{item.day}</div>
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className={`w-2 h-2 rounded-full flex-shrink-0 ${item.dot}`} />
-                  <span className={`text-xs font-bold ${item.label}`}>{item.type}</span>
+                  <span className={`text-xs font-semibold ${item.label}`}>{item.type}</span>
                 </div>
                 <div className="text-xs text-slate-500">{item.detail}</div>
               </div>
             ))}
           </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-400">
-            <span>🔁 Pattern repeats each week in the phase</span>
+          <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
+            <span>Distance increases each phase</span>
             <span>·</span>
-            <span>📏 Distance increases each phase</span>
-            <span>·</span>
-            <span>❤️ Paces calibrated to your HR Max</span>
+            <span>Paces calibrated to your HR Max</span>
           </div>
         </div>
       </section>
 
       {/* Bottom CTA */}
-      <section className="text-center pb-8">
+      <section className="pb-8 border-t border-slate-200 pt-12">
+        <h2 className="text-xl font-semibold text-slate-900 mb-2">Ready to start?</h2>
+        <p className="text-sm text-slate-500 mb-5">Builds in about 20–30 seconds. Free, no login required.</p>
         <button
           onClick={onStart}
-          className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-base px-8 py-4 rounded-2xl shadow-xl shadow-blue-500/20 hover:scale-[1.03] active:scale-[0.98] transition-all cursor-pointer"
+          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-6 py-3 rounded-lg shadow-sm cursor-pointer"
         >
-          🏃 Build My Training Plan →
+          Build my plan →
         </button>
-        <p className="text-slate-400 text-xs mt-4">Free · No account needed</p>
       </section>
     </div>
   );

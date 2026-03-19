@@ -142,21 +142,18 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Header */}
-      <header className="border-b border-slate-200 bg-white/90 backdrop-blur-sm sticky top-0 z-20">
+      <header className="border-b border-slate-200 bg-white sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
-          <button onClick={handleReset} className="flex items-center gap-2 group cursor-pointer">
-            <span className="text-xl">🏃</span>
-            <span className="font-bold text-slate-900 text-lg tracking-tight group-hover:text-blue-600 transition-colors">
+          <button onClick={handleReset} className="flex items-center gap-2 cursor-pointer">
+            <span className="text-lg">🏃</span>
+            <span className="font-bold text-slate-900 text-base hover:text-blue-600">
               WeRunAlone
             </span>
           </button>
           <div className="flex items-center gap-3">
             <WeatherNavBadge />
-            {/* <Link href="/community" className="text-xs font-medium text-slate-500 hover:text-blue-600 transition-colors hidden sm:block">
-              🌍 Community
-            </Link> */}
             {appState === 'output' && (
-              <span className="text-xs text-slate-500">Training Plan</span>
+              <span className="text-xs text-slate-400">Training Plan</span>
             )}
           </div>
         </div>
@@ -175,20 +172,20 @@ export default function Home() {
               {([1, 2, 3, 4] as const).map((s) => (
                 <div key={s} className="flex items-center gap-1">
                   <div className="flex items-center gap-1.5">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all flex-shrink-0 ${
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 ${
                       step === s
-                        ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
+                        ? 'bg-blue-600 text-white'
                         : step > s
                         ? 'bg-emerald-500 text-white'
-                        : 'bg-slate-200 text-slate-500'
+                        : 'bg-slate-100 text-slate-400 border border-slate-200'
                     }`}>
                       {step > s ? '✓' : s}
                     </div>
-                    <span className={`text-xs hidden sm:block transition-colors ${
-                      step === s ? 'text-blue-600 font-semibold' : step > s ? 'text-emerald-600' : 'text-slate-400'
+                    <span className={`text-xs hidden sm:block ${
+                      step === s ? 'text-blue-600 font-medium' : step > s ? 'text-emerald-600' : 'text-slate-400'
                     }`}>{STEP_LABELS[s - 1]}</span>
                   </div>
-                  {s < 4 && <div className={`h-px w-8 sm:w-12 mx-1 transition-all flex-shrink-0 ${step > s ? 'bg-emerald-500' : 'bg-slate-200'}`} />}
+                  {s < 4 && <div className={`h-px w-8 sm:w-12 mx-1 flex-shrink-0 ${step > s ? 'bg-emerald-400' : 'bg-slate-200'}`} />}
                 </div>
               ))}
             </div>
@@ -199,7 +196,7 @@ export default function Home() {
               </div>
             )}
 
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <div className="bg-white border border-slate-200 rounded-xl p-6">
               {step === 1 && (
                 <StepOne
                   selected={selectedTarget}
@@ -275,11 +272,11 @@ export default function Home() {
         {appState === 'loading' && (
           <div className="max-w-5xl mx-auto px-4">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-2xl px-6 py-4">
-                <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="inline-flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-5 py-3.5">
+                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
                 <div className="text-left">
-                  <div className="text-blue-600 font-semibold text-sm">AI is building your plan...</div>
-                  <div className="text-slate-500 text-xs mt-0.5">Usually 15–30 seconds</div>
+                  <div className="text-slate-800 font-medium text-sm">Building your plan...</div>
+                  <div className="text-slate-400 text-xs mt-0.5">Usually 15–30 seconds</div>
                 </div>
               </div>
             </div>
@@ -316,9 +313,9 @@ export default function Home() {
       {/* Footer */}
       {(appState === 'landing' || appState === 'input' || appState === 'error') && (
         <footer className="border-t border-slate-200 py-8 mt-auto">
-          <div className="text-center">
-            <div className="text-base font-bold text-slate-900 tracking-tight">WeRunAlone</div>
-            <div className="text-xs text-slate-400 mt-1 tracking-wide">Run solo, Run free, Then We Run Alone.</div>
+          <div className="max-w-5xl mx-auto px-6 flex items-center justify-between">
+            <div className="text-sm font-semibold text-slate-700">WeRunAlone</div>
+            <div className="text-xs text-slate-400">Run solo, Run free, Then We Run Alone.</div>
           </div>
         </footer>
       )}

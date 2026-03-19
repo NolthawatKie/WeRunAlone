@@ -38,8 +38,8 @@ export default function ShareModal({ planName, onConfirm, onClose }: ShareModalP
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 z-10">
-        <h2 className="text-lg font-bold text-slate-900 mb-1">Share to Community</h2>
+      <div className="relative bg-white rounded-xl border border-slate-200 shadow-lg w-full max-w-md p-6 z-10">
+        <h2 className="text-lg font-semibold text-slate-900 mb-1">Share to Community</h2>
         <p className="text-sm text-slate-500 mb-5">
           Share <span className="font-medium text-slate-700">{planName}</span> so others can
           discover and download it.
@@ -56,7 +56,7 @@ export default function ShareModal({ planName, onConfirm, onClose }: ShareModalP
             onChange={(e) => setName(e.target.value)}
             placeholder="Anonymous Runner"
             maxLength={50}
-            className="w-full px-3 py-2.5 rounded-xl ring-1 ring-inset ring-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-blue-500 transition"
+            className="w-full px-3 py-2.5 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500"
           />
         </label>
 
@@ -86,16 +86,16 @@ export default function ShareModal({ planName, onConfirm, onClose }: ShareModalP
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 px-4 py-2.5 rounded-xl ring-1 ring-inset ring-slate-300 text-sm font-medium text-slate-600 hover:bg-slate-50 transition cursor-pointer disabled:opacity-50"
+            className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 cursor-pointer disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={loading || !agreed}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:from-blue-500 hover:to-purple-500"
+            className="flex-1 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Sharing…' : '🌍 Share'}
+            {loading ? 'Sharing…' : 'Share'}
           </button>
         </div>
       </div>
