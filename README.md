@@ -15,7 +15,7 @@ Users fill a 4-step form → Claude generates a personalised plan → export as 
 - **PNG export** — save plan as image; mobile uses Web Share API, desktop downloads directly
 - **Community feed** — browse, filter, view, and save shared plans; saves counter increments on export
 - **Weather widget** — run condition score based on location, temperature, humidity, wind, and AQI
-- **Rate limiting** — 3 plan generations per IP (lifetime); 3 community shares per IP per day
+- **Rate limiting** — 3 plan generations per IP (lifetime); 3 community shares per IP lifetime
 
 ---
 
