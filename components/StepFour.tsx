@@ -20,7 +20,8 @@ interface StepFourProps {
   // Step 3
   hrMax: number | null;
   onBack: () => void;
-  onSubmit: () => void;
+  onFindSimilar: () => void;
+  finding?: boolean;
 }
 
 function formatTime(h: number, m: number): string {
@@ -66,7 +67,8 @@ export default function StepFour({
   raceHistory,
   hrMax,
   onBack,
-  onSubmit,
+  onFindSimilar,
+  finding = false,
 }: StepFourProps) {
   const isExperienced = level === 'intermediate';
   const totalMin = targetTimeH * 60 + targetTimeM;
@@ -168,10 +170,18 @@ export default function StepFour({
         </button>
         <button
           type="button"
-          onClick={onSubmit}
-          className="flex-1 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+          onClick={onFindSimilar}
+          disabled={finding}
+          className="flex-1 py-3 rounded-xl font-semibold text-sm bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60 cursor-pointer flex items-center justify-center gap-2"
         >
-          🏃 Generate My Plan
+          {finding ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Searching...
+            </>
+          ) : (
+            'Find Similar Plans'
+          )}
         </button>
       </div>
     </div>

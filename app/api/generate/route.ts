@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { LIMITS } from '@/lib/config';
+import { getWorkoutTemplate } from '@/lib/workout-templates';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -101,6 +102,34 @@ function getPaceZones(racePaceMinKm: string): PaceZones {
     interval: formatPaceStr(base - 15),   // −15 s — VO₂max Zone 4-5
     hill:     formatPaceStr(base - 10),   // −10 s effort equivalent
   };
+}
+
+// ── Warmup / cooldown injection ────────────────────────────────────────────────
+// Runs after the AI response is parsed. Injects template warmup/cooldown into
+// sessions that need them (Tempo, Interval, Hill Repeat, Long Run >60 min).
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function injectWarmupCooldown(plan: any, template: { warmup: unknown[]; cooldown: unknown[] }): any {
+  const INTENSE = new Set(['Tempo Run', 'Interval Run', 'Hill Repeat']);
+  const warmupSess = { type: 'warmup', duration: 10, exercises: template.warmup, description: 'Dynamic warm-up to prepare muscles and joints' };
+  const cooldownSess = { type: 'cooldown', duration: 10, exercises: template.cooldown, description: 'Static stretching to aid recovery' };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  plan.phases = (plan.phases ?? []).map((phase: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    phase.days = (phase.days ?? []).map((day: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const core = (day.sessions ?? []).filter((s: any) => s.type !== 'warmup' && s.type !== 'cooldown');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const needsWC = core.some((s: any) =>
+        s.type === 'run' && (INTENSE.has(s.runType) || (s.runType === 'Long Run' && (s.duration ?? 0) > 60))
+      );
+      day.sessions = needsWC ? [warmupSess, ...core, cooldownSess] : core;
+      return day;
+    });
+    return phase;
+  });
+  return plan;
 }
 
 // ── API handler ────────────────────────────────────────────────────────────────
@@ -293,7 +322,7 @@ ${paceBlock}
 DAILY RULES:
 - Each phase must include EVERY training day: ${days.join(', ')}
 - Weekly balance: ${balance}
-- Warmup + cooldown sessions ONLY for: Tempo Run, Interval Run, Hill Repeat, Long Run >60 min
+- Do NOT include warmup or cooldown session types — omit them entirely
 - Rest day format: { "dayName": "...", "type": "rest", "sessions": [] }
 - Strength/plyometrics sessions must always list 4–6 exercises with sets, reps, and notes
 
@@ -319,7 +348,7 @@ Generate ALL ${totalPhases} phases with ALL days (${days.join(', ')}), full sess
 
     const callClaude = async () => client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 16000,
+      max_tokens: LIMITS.MAX_OUTPUT_TOKENS,
       system: 'You are an expert running coach. Output pure JSON only — no markdown fences, no explanation, no text before or after the JSON object. Every run session must have a realistic distance in km matching the volume guidelines provided. CRITICAL: You MUST complete the entire JSON — every phase must have all its days fully populated. Never leave days arrays empty.',
       messages: [{ role: 'user', content: prompt }],
     });
@@ -401,6 +430,8 @@ Generate ALL ${totalPhases} phases with ALL days (${days.join(', ')}), full sess
       }
     }
     if (!plan) throw parseError ?? new Error('AI returned invalid JSON. Please try again.');
+
+    plan = injectWarmupCooldown(plan, getWorkoutTemplate(targetLabel, level));
 
     // ── Update generate rate limit count ──────────────────────────────────────
     if (rateRow) {

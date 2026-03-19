@@ -9,10 +9,28 @@ import StepThree from '@/components/StepThree';
 import StepFour from '@/components/StepFour';
 import LoadingSkeleton from '@/components/LoadingSkeleton';
 import OutputPlan from '@/components/OutputPlan';
+import SimilarPlansPanel from '@/components/SimilarPlansPanel';
+import CommunityPlanModal from '@/components/CommunityPlanModal';
 import type { TrainingPlan, WeekConfig, RaceEntry } from '@/types/plan';
 import WeatherNavBadge from '@/components/WeatherNavBadge';
 
-type AppState = 'landing' | 'input' | 'loading' | 'output' | 'error';
+type AppState = 'landing' | 'input' | 'loading' | 'output' | 'error' | 'similar';
+
+interface SimilarPlan {
+  id: string;
+  plan_name: string;
+  target: string;
+  level: string;
+  weeks: number;
+  run_days: string[];
+  hr_max: number | null;
+  shared_by: string | null;
+  download_count: number;
+}
+
+interface FullPlanEntry extends SimilarPlan {
+  plan_data: TrainingPlan;
+}
 type ModalType = 'token_limit' | 'rate_limit' | null;
 
 const DEFAULT_WEEK_CONFIG: WeekConfig = { min: 1, max: 30, default: 8, warnBelow: 4 };
@@ -52,6 +70,13 @@ export default function Home() {
 
   // Step 3 — HR
   const [hrMax, setHrMax] = useState<number | null>(null);
+
+  // Similar plans flow
+  const [similarPlans, setSimilarPlans] = useState<SimilarPlan[]>([]);
+  const [findingPlans, setFindingPlans] = useState(false);
+  const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
+  const [viewingPlanId, setViewingPlanId] = useState<string | null>(null);
+  const [viewedCommunityPlan, setViewedCommunityPlan] = useState<FullPlanEntry | null>(null);
 
   const handleTargetSelect = (
     id: string,
@@ -143,6 +168,74 @@ export default function Home() {
     setAppState('landing');
     setStep(1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleFindSimilar = async () => {
+    setFindingPlans(true);
+    try {
+      const params = new URLSearchParams({
+        target: selectedTargetLabel,
+        level,
+        weeksNear: String(weeks),
+      });
+      const res = await fetch(`/api/community/list?${params}`);
+      const data = await res.json();
+      if (res.ok && Array.isArray(data) && data.length > 0) {
+        setSimilarPlans(data);
+        setAppState('similar');
+      } else {
+        await handleGenerate();
+      }
+    } catch {
+      await handleGenerate();
+    } finally {
+      setFindingPlans(false);
+    }
+  };
+
+  const TARGET_DISTANCES: Record<string, number> = {
+    'Fun Run': 5,
+    'Mini Marathon': 10,
+    'Half Marathon': 21.1,
+    'Full Marathon': 42.2,
+  };
+
+  const handleUseThisPlan = async (id: string) => {
+    setLoadingPlanId(id);
+    try {
+      const res = await fetch(`/api/community/download/${id}`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? 'Failed to load plan');
+      const communityPlan = similarPlans.find(p => p.id === id);
+      if (!communityPlan) throw new Error('Plan not found');
+      setSelectedTargetLabel(communityPlan.target);
+      setSelectedTargetDistance(TARGET_DISTANCES[communityPlan.target] ?? selectedTargetDistance);
+      setLevel(communityPlan.level);
+      setWeeks(communityPlan.weeks);
+      setSelectedDays(communityPlan.run_days ?? selectedDays);
+      setHrMax(communityPlan.hr_max);
+      setPlan(data.plan_data);
+      setAppState('output');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to load plan');
+    } finally {
+      setLoadingPlanId(null);
+    }
+  };
+
+  const handleViewSimilarPlan = async (id: string) => {
+    setViewingPlanId(id);
+    try {
+      const res = await fetch(`/api/community/${id}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? 'Not found');
+      setViewedCommunityPlan(data);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to load plan');
+    } finally {
+      setViewingPlanId(null);
+    }
   };
 
   const handleStart = () => {
@@ -274,7 +367,8 @@ export default function Home() {
                   raceHistory={raceHistory}
                   hrMax={hrMax}
                   onBack={() => setStep(3)}
-                  onSubmit={handleGenerate}
+                  onFindSimilar={handleFindSimilar}
+                  finding={findingPlans}
                 />
               )}
             </div>
@@ -294,6 +388,21 @@ export default function Home() {
               </div>
             </div>
             <LoadingSkeleton />
+          </div>
+        )}
+
+        {/* Similar plans */}
+        {appState === 'similar' && (
+          <div className="max-w-5xl mx-auto px-6">
+            <SimilarPlansPanel
+              plans={similarPlans}
+              loadingId={loadingPlanId}
+              viewingId={viewingPlanId}
+              onUseThisPlan={handleUseThisPlan}
+              onViewPlan={handleViewSimilarPlan}
+              onGenerateNew={handleGenerate}
+              onBack={() => { setSimilarPlans([]); setAppState('input'); setStep(4); }}
+            />
           </div>
         )}
 
@@ -320,6 +429,21 @@ export default function Home() {
               onReset={handleReset}
             />
           </div>
+        )}
+
+        {/* Community plan view modal */}
+        {viewedCommunityPlan && (
+          <CommunityPlanModal
+            plan={viewedCommunityPlan.plan_data}
+            planName={viewedCommunityPlan.plan_name}
+            sharedBy={viewedCommunityPlan.shared_by}
+            target={viewedCommunityPlan.target}
+            level={viewedCommunityPlan.level}
+            weeks={viewedCommunityPlan.weeks}
+            runDays={viewedCommunityPlan.run_days}
+            hrMax={viewedCommunityPlan.hr_max}
+            onClose={() => setViewedCommunityPlan(null)}
+          />
         )}
       </main>
 
@@ -367,7 +491,7 @@ export default function Home() {
       )}
 
       {/* Footer */}
-      {(appState === 'landing' || appState === 'input' || appState === 'error') && (
+      {(appState === 'landing' || appState === 'input' || appState === 'error' || appState === 'similar') && (
         <footer className="border-t border-slate-200 py-8 mt-auto">
           <div className="max-w-5xl mx-auto px-6 flex items-center justify-between">
             <div className="text-sm font-semibold text-slate-700">WeRunAlone</div>
