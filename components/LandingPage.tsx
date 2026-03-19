@@ -104,16 +104,16 @@ export default function LandingPage({ onStart }: LandingPageProps) {
     <div className="max-w-5xl mx-auto px-6 py-12 space-y-20">
 
       {/* Hero */}
-      <section className="pt-4 space-y-5">
+      <section className="pt-4 space-y-5 text-center">
         <p className="text-sm text-blue-600 font-medium">Free training plans for runners</p>
-        <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 leading-tight max-w-2xl">
+        <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 leading-tight">
           Run solo, run free.<br />
           <span className="text-blue-600">We Run Alone.</span>
         </h1>
-        <p className="text-slate-500 text-lg max-w-xl leading-relaxed">
+        <p className="text-slate-500 text-lg max-w-xl mx-auto leading-relaxed">
           Tell us your goal, your schedule, and your heart rate max — we'll build a plan that actually fits your life.
         </p>
-        <div className="flex flex-wrap items-center gap-3 pt-1">
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           <button
             onClick={onStart}
             className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-6 py-3 rounded-lg shadow-sm cursor-pointer"
@@ -122,7 +122,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
           </button>
           <Link
             href="/community"
-            className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-medium text-sm px-6 py-3 rounded-lg border border-slate-200 hover:border-slate-300"
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-6 py-3 rounded-lg shadow-sm"
           >
             Browse community plans
           </Link>
@@ -246,7 +246,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
       </section>
 
       {/* Bottom CTA */}
-      <section className="pb-8 border-t border-slate-200 pt-12">
+      <section className="pb-8 border-t border-slate-200 pt-12 text-center">
         <h2 className="text-xl font-semibold text-slate-900 mb-2">Ready to start?</h2>
         <p className="text-sm text-slate-500 mb-5">Builds in about 20–30 seconds. Free, no login required.</p>
         <button

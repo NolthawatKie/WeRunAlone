@@ -1,5 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
+import { LIMITS } from '@/lib/config';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -112,6 +114,27 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // ── Rate limit: max 3 plan generations per IP (lifetime) ─────────────────
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
+      request.headers.get('x-real-ip') ??
+      '127.0.0.1';
+    const generateIpKey = `generate:${ip}`;
+
+    const { data: rateRow } = await supabase
+      .from('share_rate_limit')
+      .select('id, count')
+      .eq('ip', generateIpKey)
+      .maybeSingle();
+
+    if (rateRow && rateRow.count >= LIMITS.PLAN_GENERATIONS_PER_IP) {
+      return NextResponse.json(
+        { error: 'RATE_LIMIT' },
+        { status: 429 },
+      );
+    }
+
     const client = new Anthropic({ apiKey });
     const body = await request.json();
     const {
@@ -302,6 +325,9 @@ Generate ALL ${totalPhases} phases with ALL days (${days.join(', ')}), full sess
     });
 
     const parseResponse = (message: Awaited<ReturnType<typeof callClaude>>) => {
+      if (message.stop_reason === 'max_tokens') {
+        throw new Error('TOKEN_LIMIT');
+      }
       const content = message.content[0];
       if (content.type !== 'text') throw new Error('Unexpected response type from API');
       let jsonText = content.text.trim();
@@ -365,11 +391,28 @@ Generate ALL ${totalPhases} phases with ALL days (${days.join(', ')}), full sess
         parseError = null;
         break;
       } catch (err) {
-        parseError = err instanceof Error ? err : new Error(String(err));
+        const e = err instanceof Error ? err : new Error(String(err));
+        // TOKEN_LIMIT is unrecoverable — don't retry
+        if (e.message === 'TOKEN_LIMIT') {
+          return NextResponse.json({ error: 'TOKEN_LIMIT' }, { status: 422 });
+        }
+        parseError = e;
         console.error(`[generate] Attempt ${attempt} failed:`, parseError.message);
       }
     }
     if (!plan) throw parseError ?? new Error('AI returned invalid JSON. Please try again.');
+
+    // ── Update generate rate limit count ──────────────────────────────────────
+    if (rateRow) {
+      await supabase
+        .from('share_rate_limit')
+        .update({ count: rateRow.count + 1 })
+        .eq('id', rateRow.id);
+    } else {
+      await supabase
+        .from('share_rate_limit')
+        .insert({ ip: generateIpKey, date: new Date().toISOString().split('T')[0], count: 1 });
+    }
 
     return NextResponse.json(plan);
   } catch (error) {

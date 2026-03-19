@@ -13,6 +13,7 @@ import type { TrainingPlan, WeekConfig, RaceEntry } from '@/types/plan';
 import WeatherNavBadge from '@/components/WeatherNavBadge';
 
 type AppState = 'landing' | 'input' | 'loading' | 'output' | 'error';
+type ModalType = 'token_limit' | 'rate_limit' | null;
 
 const DEFAULT_WEEK_CONFIG: WeekConfig = { min: 1, max: 30, default: 8, warnBelow: 4 };
 
@@ -25,6 +26,7 @@ export default function Home() {
   const [appState, setAppState] = useState<AppState>('landing');
   const [plan, setPlan] = useState<TrainingPlan | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [modal, setModal] = useState<ModalType>(null);
 
   // Step 1 — target
   const [selectedTarget, setSelectedTarget] = useState('');
@@ -114,6 +116,17 @@ export default function Home() {
       });
 
       const data = await response.json();
+
+      if (response.status === 429 && data.error === 'RATE_LIMIT') {
+        setModal('rate_limit');
+        setAppState('input');
+        return;
+      }
+      if (response.status === 422 && data.error === 'TOKEN_LIMIT') {
+        setModal('token_limit');
+        setAppState('input');
+        return;
+      }
       if (!response.ok) throw new Error(data.error ?? 'API error');
 
       setPlan(data);
@@ -309,6 +322,49 @@ export default function Home() {
           </div>
         )}
       </main>
+
+      {/* Token limit / Rate limit modals */}
+      {modal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-lg max-w-sm w-full p-6">
+            {modal === 'token_limit' && (
+              <>
+                <div className="text-2xl mb-3">⚠️</div>
+                <h2 className="text-base font-semibold text-slate-900 mb-2">Plan too large to generate</h2>
+                <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                  Your inputs produced a plan that exceeded the AI output limit. Try reducing one or more of these:
+                </p>
+                <ul className="text-sm text-slate-600 space-y-1 mb-5 list-disc list-inside">
+                  <li>Number of weeks (try shorter plan)</li>
+                  <li>Number of training days per week</li>
+                  <li>Switch from Full/Half Marathon to a shorter distance</li>
+                </ul>
+                <button
+                  onClick={() => setModal(null)}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-lg cursor-pointer"
+                >
+                  Go back and adjust
+                </button>
+              </>
+            )}
+            {modal === 'rate_limit' && (
+              <>
+                <div className="text-2xl mb-3">🚦</div>
+                <h2 className="text-base font-semibold text-slate-900 mb-2">Daily limit reached</h2>
+                <p className="text-sm text-slate-600 leading-relaxed mb-5">
+                  You&apos;ve used all 3 plan generations available for this showcase. The community plans are still available to browse.
+                </p>
+                <button
+                  onClick={() => { setModal(null); setAppState('landing'); }}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-lg cursor-pointer"
+                >
+                  Back to home
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       {(appState === 'landing' || appState === 'input' || appState === 'error') && (

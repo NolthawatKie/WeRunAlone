@@ -248,7 +248,13 @@ export default function CommunityPage() {
           weeks={viewPlan.weeks}
           runDays={viewPlan.run_days}
           hrMax={viewPlan.hr_max}
+          planId={viewPlan.id}
           onClose={() => setViewPlan(null)}
+          onSaved={() => {
+            setPlans(prev => prev.map(p =>
+              p.id === viewPlan.id ? { ...p, download_count: p.download_count + 1 } : p
+            ));
+          }}
         />
       )}
     </div>

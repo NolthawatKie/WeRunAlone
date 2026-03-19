@@ -12,6 +12,7 @@ const sarabun = Sarabun({
 export const metadata: Metadata = {
   title: 'We Run Alone',
   description: 'Let AI plans',
+  icons: { icon: '/favicon.svg' },
 };
 
 export default function RootLayout({

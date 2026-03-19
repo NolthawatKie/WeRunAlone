@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import type { TrainingPlan, Phase, Day, Session } from '@/types/plan';
+import PlanExportView, { type PlanExportMeta } from './PlanExportView';
 
 // ─── Reused style maps (mirrors OutputPlan.tsx) ───────────────────────────────
 
@@ -145,26 +146,56 @@ interface CommunityPlanModalProps {
   weeks?: number;
   runDays?: string[];
   hrMax?: number | null;
+  planId?: string;
   onClose: () => void;
+  onSaved?: () => void;
 }
 
-export default function CommunityPlanModal({ plan, planName, sharedBy, target, level, weeks, runDays, hrMax, onClose }: CommunityPlanModalProps) {
-  const planRef = useRef<HTMLDivElement>(null);
+export default function CommunityPlanModal({ plan, planName, sharedBy, target, level, weeks, runDays, hrMax, planId, onClose, onSaved }: CommunityPlanModalProps) {
+  const exportRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
 
+  // Build meta array for the export image header
+  const exportMeta: PlanExportMeta[] = [
+    ...(target ? [{ icon: '🎯', text: target }] : []),
+    ...(weeks   ? [{ icon: '📆', text: `${weeks} weeks` }] : []),
+    ...(level   ? [{ icon: level === 'beginner' ? '🌱' : '⚡', text: level === 'beginner' ? 'Beginner' : 'Experienced' }] : []),
+    ...(hrMax   ? [{ icon: '❤️', text: `HR Max ${hrMax} bpm` }] : []),
+    ...(runDays && runDays.length > 0 ? [{ icon: '📅', text: runDays.join(', ') }] : []),
+  ];
+
   const handleExport = async () => {
-    if (!planRef.current || exporting) return;
+    if (!exportRef.current || exporting) return;
     setExporting(true);
     try {
       const { toPng } = await import('html-to-image');
-      const dataUrl = await toPng(planRef.current, {
+      const el = exportRef.current;
+      const opts = {
         backgroundColor: '#f8fafc',
         pixelRatio: 2,
-      });
+        cacheBust: true,
+        height: el.scrollHeight,
+      };
+
+      // Ensure Sarabun is loaded before capture
+      await document.fonts.ready;
+      // Warmup pass — loads html-to-image's font cache
+      await toPng(el, opts);
+      // Real capture — correct font metrics
+      const dataUrl = await toPng(el, opts);
+
       const fileName = `WeRunAlone-${planName.replace(/\s+/g, '-')}.png`;
 
-      // Try Web Share API (works on mobile Safari/Chrome)
-      if (navigator.share && navigator.canShare) {
+      // Increment saves count (fire-and-forget)
+      if (planId) {
+        fetch(`/api/community/download/${planId}`, { method: 'POST' })
+          .then(() => onSaved?.())
+          .catch(() => {});
+      }
+
+      // Mobile (iOS / Android): Web Share API → save to photo library / files
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile && navigator.share && navigator.canShare) {
         try {
           const res = await fetch(dataUrl);
           const blob = await res.blob();
@@ -174,15 +205,17 @@ export default function CommunityPlanModal({ plan, planName, sharedBy, target, l
             return;
           }
         } catch {
-          // Share was cancelled or failed — fall through to download
+          // User cancelled or share failed — fall through to download
         }
       }
 
-      // Desktop: trigger download
+      // Desktop (Windows / macOS / Linux) and mobile fallback
       const link = document.createElement('a');
       link.download = fileName;
       link.href = dataUrl;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (err) {
       console.error('Export failed:', err);
       alert('Could not save image. Please try again.');
@@ -222,7 +255,7 @@ export default function CommunityPlanModal({ plan, planName, sharedBy, target, l
 
         {/* Scrollable plan content */}
         <div className="flex-1 overflow-y-auto p-4">
-          <div ref={planRef} className="bg-slate-50 rounded-2xl ring-1 ring-inset ring-slate-200">
+          <div className="bg-slate-50 rounded-2xl ring-1 ring-inset ring-slate-200">
             {/* Header */}
             <div className="text-center mb-8 pt-8 px-6">
               <div className="inline-flex items-center gap-2 text-xs font-semibold text-blue-600 uppercase tracking-widest bg-blue-50 ring-1 ring-inset ring-blue-200 px-3 py-1 rounded-full mb-4">
@@ -254,6 +287,17 @@ export default function CommunityPlanModal({ plan, planName, sharedBy, target, l
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Off-screen export view — captured by handleExport, never visible to user */}
+      <div style={{ position: 'fixed', left: '-9999px', top: 0, zIndex: -1, pointerEvents: 'none' }}>
+        <PlanExportView
+          ref={exportRef}
+          plan={plan}
+          planLabel="Community Training Plan"
+          meta={exportMeta}
+          sharedBy={sharedBy}
+        />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { LIMITS } from '@/lib/config';
 
 export async function POST(req: NextRequest) {
   const ip =
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
     .eq('date', today)
     .maybeSingle();
 
-  if (rateRow && rateRow.count >= 3) {
+  if (rateRow && rateRow.count >= LIMITS.COMMUNITY_SHARES_PER_DAY) {
     return NextResponse.json(
       { error: 'Rate limit exceeded: max 3 shares per day' },
       { status: 429 },

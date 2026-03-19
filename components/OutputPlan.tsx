@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import type { TrainingPlan, Phase, Day, Session } from '@/types/plan';
 import ShareModal from './ShareModal';
+import PlanExportView, { type PlanExportMeta } from './PlanExportView';
 
 // ─── Session styles ───────────────────────────────────────────────────────────
 
@@ -217,8 +218,21 @@ interface OutputPlanProps {
 }
 
 export default function OutputPlan({ plan, formSummary, onReset }: OutputPlanProps) {
-  const planRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+
+  // Build meta for the export image
+  const exportMeta: PlanExportMeta[] = [
+    { icon: '🎯', text: `${formSummary.targetLabel} (${formSummary.targetDistance} km)` },
+    ...((formSummary.targetTimeH ?? 0) > 0 || (formSummary.targetTimeM ?? 0) > 0
+      ? [{ icon: '⏱', text: `Target ${formSummary.targetTimeH ?? 0}h ${String(formSummary.targetTimeM ?? 0).padStart(2, '0')}m` }]
+      : []
+    ),
+    { icon: '📆', text: `${plan.totalWeeks} weeks` },
+    { icon: formSummary.level === 'beginner' ? '🌱' : '⚡', text: formSummary.level === 'beginner' ? 'Beginner' : 'Experienced' },
+    ...(formSummary.hrMax ? [{ icon: '❤️', text: `HR Max ${formSummary.hrMax} bpm` }] : []),
+    { icon: '📅', text: formSummary.days.join(', ') },
+  ];
   const [showShareModal, setShowShareModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -249,18 +263,30 @@ export default function OutputPlan({ plan, formSummary, onReset }: OutputPlanPro
   };
 
   const handleExport = async () => {
-    if (!planRef.current || exporting) return;
+    if (!exportRef.current || exporting) return;
     setExporting(true);
     try {
       const { toPng } = await import('html-to-image');
-      const dataUrl = await toPng(planRef.current, {
+      const el = exportRef.current;
+      const opts = {
         backgroundColor: '#f8fafc',
         pixelRatio: 2,
-      });
+        cacheBust: true,
+        height: el.scrollHeight,
+      };
+
+      // Ensure Sarabun is loaded before capture
+      await document.fonts.ready;
+      // Warmup pass — loads html-to-image's font cache
+      await toPng(el, opts);
+      // Real capture — correct font metrics
+      const dataUrl = await toPng(el, opts);
+
       const fileName = `WeRunAlone-${plan.planName.replace(/\s+/g, '-')}.png`;
 
-      // Try Web Share API (works on mobile Safari/Chrome)
-      if (navigator.share && navigator.canShare) {
+      // Mobile (iOS / Android): Web Share API → save to photo library / files
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile && navigator.share && navigator.canShare) {
         try {
           const res = await fetch(dataUrl);
           const blob = await res.blob();
@@ -270,15 +296,17 @@ export default function OutputPlan({ plan, formSummary, onReset }: OutputPlanPro
             return;
           }
         } catch {
-          // Share was cancelled or failed — fall through to download
+          // User cancelled or share failed — fall through to download
         }
       }
 
-      // Desktop: trigger download
+      // Desktop (Windows / macOS / Linux) and mobile fallback
       const link = document.createElement('a');
       link.download = fileName;
       link.href = dataUrl;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (err) {
       console.error('Export failed:', err);
       alert('Could not save image. Please try again.');
@@ -337,7 +365,7 @@ export default function OutputPlan({ plan, formSummary, onReset }: OutputPlanPro
       )}
 
       {/* Exportable plan */}
-      <div ref={planRef} id="plan-export-root" className="bg-slate-50 rounded-2xl ring-1 ring-inset ring-slate-200">
+      <div id="plan-export-root" className="bg-slate-50 rounded-2xl ring-1 ring-inset ring-slate-200">
         {/* Plan header */}
         <div className="text-center mb-8 pt-8 px-6">
           <div className="inline-flex items-center gap-2 text-xs font-semibold text-blue-600 uppercase tracking-widest bg-blue-50 ring-1 ring-inset ring-blue-200 px-3 py-1 rounded-full mb-4">
@@ -393,6 +421,16 @@ export default function OutputPlan({ plan, formSummary, onReset }: OutputPlanPro
           <div className="text-xl font-bold tracking-tight text-slate-900">WeRunAlone</div>
           <div className="text-xs text-slate-400 tracking-wider">Run solo, Run free, Then We Run Alone.</div>
         </div>
+      </div>
+
+      {/* Off-screen export view — captured by handleExport, never visible to user */}
+      <div style={{ position: 'fixed', left: '-9999px', top: 0, zIndex: -1, pointerEvents: 'none' }}>
+        <PlanExportView
+          ref={exportRef}
+          plan={plan}
+          planLabel="Personal Training Plan"
+          meta={exportMeta}
+        />
       </div>
     </div>
   );
