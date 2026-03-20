@@ -5,7 +5,7 @@
 
 export const LIMITS = {
   /** Maximum total number of training plans generated across ALL users combined (global lifetime budget). */
-  PLAN_GENERATIONS_GLOBAL: 100,
+  PLAN_GENERATIONS_GLOBAL: 300,
 
   /** Maximum number of training plans a single IP can generate (lifetime, regardless of global budget). */
   PLAN_GENERATIONS_PER_IP: 3,
