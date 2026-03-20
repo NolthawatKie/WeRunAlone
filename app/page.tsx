@@ -262,8 +262,14 @@ export default function Home() {
             </span>
           </button>
           <nav className="flex items-center gap-1 ml-auto">
+            <Link href="/" className="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-50 text-blue-600 transition-colors">
+              Home
+            </Link>
             <Link href="/community" className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors">
               Community
+            </Link>
+            <Link href="/running-status" className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              Running Status
             </Link>
             <Link href="/about" className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors">
               About

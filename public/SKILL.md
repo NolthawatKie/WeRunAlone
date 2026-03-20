@@ -189,3 +189,88 @@ After all phases, add a **Coach Notes** section with 3–5 bullet points coverin
 - Never use distances shorter than the volume guide targets
 - Always calculate paces from the actual race target time — never use generic estimates without calculation
 - Offer to adjust the plan (days, weeks, intensity) after generating
+
+---
+
+## RUNNING STATUS — Condition Assessment
+
+If the user asks about running conditions for a city, a race venue, or race day weather, use this scoring framework to assess and advise.
+
+### Scoring (start at 100, deduct points)
+
+**Temperature / Heat Index**
+Heat index = temperature + (humidity − 40) × 0.15
+
+| Condition | Deduction |
+|-----------|-----------|
+| Below 0°C (freezing) | −40 |
+| 0–5°C (cold) | −15 |
+| Heat index ≤ 22°C | 0 (ideal) |
+| Heat index 23–27°C | −10 |
+| Heat index 28–32°C | −25 |
+| Heat index 33–38°C | −40 |
+| Heat index > 38°C | −55 |
+
+**Weather**
+
+| Condition | Deduction |
+|-----------|-----------|
+| Thunderstorm | −50 |
+| Heavy rain / rain showers | −25 to −30 |
+| Snow | −35 |
+| Light drizzle | −10 |
+| Fog | −10 |
+
+**Wind**
+
+| Speed | Deduction |
+|-------|-----------|
+| > 50 km/h | −30 |
+| 31–50 km/h | −15 |
+| 21–30 km/h | −5 |
+
+**Precipitation:** > 5 mm −20 · 1–5 mm −10
+
+**AQI (Air Quality Index)**
+
+| AQI | Deduction | Advice |
+|-----|-----------|--------|
+| ≤ 50 | 0 | Good |
+| 51–75 | −5 | Moderate — keep pace easy |
+| 76–100 | −12 | Moderate–High — run early morning, shorter distance |
+| 101–150 | −25 | Unhealthy for sensitive runners — consider a mask |
+| 151–200 | −45 | Unhealthy — wear N95 mask, cut session short |
+| 201–300 | −60 | Very unhealthy — skip outdoor run |
+| > 300 | −80 | Hazardous — do not run outside |
+
+### Verdict
+
+| Score | Label | Meaning |
+|-------|-------|---------|
+| ≥ 80 | Great run | Ideal or near-ideal conditions |
+| 45–79 | Okay to run | Manageable with adjustments |
+| < 45 | Skip today | Conditions are unsafe or very tough |
+
+### World Marathon Majors — typical race-day conditions
+
+Use as reference when a user asks if conditions at a major are good for racing or spectating.
+
+| Race | City | Country | Typical Race Month | Typical Temp | Notes |
+|------|----|---------|-------------------|--------------|-------|
+| Tokyo Marathon | Tokyo | Japan | March | 8–13°C | Cool, low humidity — fast conditions |
+| Boston Marathon | Boston | USA | April | 8–15°C | Variable spring weather, can be wet or windy |
+| TCS London Marathon | London | UK | April | 10–16°C | Mild, overcast — good racing weather |
+| Sydney Marathon | Sydney | Australia | September | 14–19°C | Southern hemisphere spring — comfortable |
+| BMW Berlin Marathon | Berlin | Germany | September | 13–18°C | Consistently cool and dry — world record course |
+| Bank of America Chicago Marathon | Chicago | USA | October | 8–15°C | Cool autumn, occasional wind off Lake Michigan |
+| TCS New York City Marathon | New York | USA | November | 7–13°C | Cold, can be windy — dress in layers |
+
+Source: [worldmarathonmajors.com/stars](https://www.worldmarathonmajors.com/stars)
+
+### How to use this in conversation
+
+When a user mentions a race city or asks "is it good weather to run in [city]?":
+1. Ask for (or look up) current temperature, humidity, wind speed, precipitation, and AQI if available
+2. Apply the scoring above
+3. Give a score, a verdict label, and 2–3 specific tips based on the deductions
+4. If it's a World Major venue, add the typical race-day context from the table above

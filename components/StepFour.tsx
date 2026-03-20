@@ -154,9 +154,15 @@ export default function StepFour({
       </div>
 
       {/* Info note */}
-      <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-6 text-xs text-blue-700">
+      <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-3 text-xs text-blue-700">
         <span className="text-base flex-shrink-0">🤖</span>
         <span>Claude AI will use all of this to build a personalised plan tailored to your goal, experience, and schedule. Generation takes 15–30 seconds.</span>
+      </div>
+
+      {/* Disclaimer */}
+      <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6 text-xs text-amber-800">
+        <span className="text-base flex-shrink-0">⚠️</span>
+        <span>This plan is an <strong>AI-generated guideline</strong> based on your inputs — not a certified coaching programme. Use it as a starting point, search for more detail, and consult a qualified running coach or sports professional for a fully personalised and accurate plan.</span>
       </div>
 
       {/* Buttons */}

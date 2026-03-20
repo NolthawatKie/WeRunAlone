@@ -144,8 +144,14 @@ export default function CommunityPage() {
             <span className="font-bold text-slate-900 text-base hover:text-blue-600">WeRunAlone</span>
           </Link>
           <nav className="flex items-center gap-1 ml-auto">
+            <Link href="/" className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              Home
+            </Link>
             <Link href="/community" className="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-50 text-blue-600 transition-colors">
               Community
+            </Link>
+            <Link href="/running-status" className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              Running Status
             </Link>
             <Link href="/about" className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors">
               About
@@ -164,7 +170,11 @@ export default function CommunityPage() {
         {/* Page title */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-slate-900 mb-1">Community Plans</h1>
-          <p className="text-sm text-slate-500">Discover training plans shared by other runners</p>
+          <p className="text-sm text-slate-500 mb-4">Discover training plans shared by other runners</p>
+          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800">
+            <span className="text-base flex-shrink-0">⚠️</span>
+            <span>These plans are <strong>AI-generated guidelines</strong> based on individual inputs. Use them as a starting point — search for more detail and consult a qualified running coach or sports professional for a fully personalised and accurate programme.</span>
+          </div>
         </div>
 
         {/* Filter bar */}

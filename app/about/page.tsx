@@ -2,9 +2,11 @@ import Link from 'next/link';
 import WeatherNavBadge from '@/components/WeatherNavBadge';
 
 const NAV_LINKS = [
-  { href: '/community', label: 'Community' },
-  { href: '/about',     label: 'About'     },
-  { href: '/updates',   label: 'Updates'   },
+  { href: '/',                label: 'Home'            },
+  { href: '/community',       label: 'Community'       },
+  { href: '/running-status',  label: 'Running Status'  },
+  { href: '/about',           label: 'About'           },
+  { href: '/updates',         label: 'Updates'         },
 ];
 
 const STACK = [
@@ -90,6 +92,10 @@ export default function AboutPage() {
             in 15–30 seconds using Claude AI. Plans can be exported as an image or shared with the community
             so others can discover and reuse them.
           </p>
+          <div className="mt-4 inline-flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800 max-w-2xl">
+            <span className="text-base flex-shrink-0">🧪</span>
+            <span><strong>This is a showcase project</strong> — built to demonstrate what&apos;s possible with the Claude API and modern web tooling. It is not a certified coaching service. Plans are AI-generated guidelines based on your inputs; always seek advice from a qualified running coach or sports professional for a fully personalised programme.</span>
+          </div>
         </section>
 
         {/* Objective */}
@@ -141,6 +147,34 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* Running Status feature */}
+        <section>
+          <h2 className="text-xl font-semibold text-slate-900 mb-1">Running Status</h2>
+          <p className="text-sm text-slate-500 mb-6">Live running conditions across the globe</p>
+          <div className="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+            <p className="text-sm text-slate-600 leading-relaxed">
+              The <strong>Running Status</strong> page gives you a live, ranked snapshot of running conditions at your location, all 7 World Marathon Majors, and up to 4 custom cities — all in one place.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                { icon: '📍', title: 'Your Location', desc: 'Auto-detected via browser geolocation. Full weather + AQI from your nearest monitoring station.' },
+                { icon: '🏅', title: '7 World Majors', desc: 'Tokyo · Boston · London · Sydney · Berlin · Chicago · New York. Weather fetched in a single batch call, cached 30 min.' },
+                { icon: '📌', title: 'Custom Cities', desc: 'Search any city and add up to 4 extra locations (12 total). Each gets full weather + AQI data.' },
+              ].map((item) => (
+                <div key={item.title} className="bg-slate-50 border border-slate-100 rounded-lg p-4">
+                  <div className="text-xl mb-2">{item.icon}</div>
+                  <div className="font-semibold text-slate-900 text-sm mb-1">{item.title}</div>
+                  <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+            <div className="pt-2 border-t border-slate-100 text-xs text-slate-500 space-y-1">
+              <p>Each card shows: run score (0–100), weather condition, temperature + feels like, heat index, humidity, wind, precipitation, and AQI with station name. Cards are ranked by score descending.</p>
+              <p>Source: <a href="https://www.worldmarathonmajors.com/stars" target="_blank" rel="noreferrer" className="underline hover:text-slate-700">worldmarathonmajors.com/stars</a> · Weather via Open-Meteo · AQI via WAQI</p>
+            </div>
+          </div>
+        </section>
+
         {/* Tech stack */}
         <section>
           <h2 className="text-xl font-semibold text-slate-900 mb-1">Tech stack</h2>
@@ -163,7 +197,8 @@ export default function AboutPage() {
           <p className="text-sm text-slate-500 mb-6">
             Take the same coaching logic to Claude.ai — no app needed
           </p>
-          <div className="bg-white border border-slate-200 rounded-xl p-6">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 space-y-6">
+            {/* Intro + download */}
             <div className="flex flex-col sm:flex-row sm:items-start gap-5">
               <div className="flex-1">
                 <p className="text-sm text-slate-600 leading-relaxed mb-3">
@@ -189,6 +224,53 @@ export default function AboutPage() {
                 </svg>
                 Download Skill
               </a>
+            </div>
+
+            {/* What's inside */}
+            <div className="border-t border-slate-100 pt-5">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">What&apos;s inside the skill file</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  {
+                    icon: '🗂️',
+                    title: '4-step plan builder',
+                    desc: 'Guides Claude to collect race goal, target finish time, runner background, training days, and HR Max — one step at a time — before generating.',
+                  },
+                  {
+                    icon: '📐',
+                    title: 'Training pace formulas',
+                    desc: 'All 5 run types (Easy, Long, Tempo, Interval, Hill) derived from your race pace. Claude calculates exact min/km targets, not generic estimates.',
+                  },
+                  {
+                    icon: '📊',
+                    title: 'Volume targets by distance & level',
+                    desc: 'Long run, easy run, and weekly km targets for all 4 race distances × 2 levels. Interpolated across phases with automatic cut-back weeks.',
+                  },
+                  {
+                    icon: '🏋️',
+                    title: 'Strength & plyometrics library',
+                    desc: 'Curated exercise lists for strength and plyometrics sessions, plus static warmup and cooldown routines injected before/after hard sessions.',
+                  },
+                  {
+                    icon: '🌍',
+                    title: 'Running Status scoring',
+                    desc: 'Full condition scoring framework (0–100) covering temperature, heat index, humidity, wind, precipitation, and AQI — plus World Marathon Majors reference table for race-day context.',
+                  },
+                  {
+                    icon: '✅',
+                    title: 'Validation & coaching rules',
+                    desc: 'Flags unrealistic finish times, enforces phase structure, and offers plan adjustments after generation. Taper weeks, phase counts, and day balance are all rule-driven.',
+                  },
+                ].map((item) => (
+                  <div key={item.title} className="flex gap-3 bg-slate-50 border border-slate-100 rounded-lg p-3.5">
+                    <span className="text-xl flex-shrink-0">{item.icon}</span>
+                    <div>
+                      <div className="font-semibold text-slate-800 text-xs mb-1">{item.title}</div>
+                      <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>

@@ -149,6 +149,11 @@ export default function LandingPage({ onStart }: LandingPageProps) {
         </div>
         <p className="text-xs text-slate-400">No account needed · takes about 2 minutes</p>
 
+        <div className="inline-flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800 max-w-xl mx-auto text-left">
+          <span className="text-base flex-shrink-0">🧪</span>
+          <span><strong>Showcase project</strong> — plans are AI-generated guidelines based on your inputs. They are not a substitute for advice from a qualified running coach or sports professional.</span>
+        </div>
+
         <WeatherWidget />
       </section>
 

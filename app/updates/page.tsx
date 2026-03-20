@@ -4,9 +4,11 @@ import Link from 'next/link';
 import WeatherNavBadge from '@/components/WeatherNavBadge';
 
 const NAV_LINKS = [
-  { href: '/community', label: 'Community' },
-  { href: '/about',     label: 'About'     },
-  { href: '/updates',   label: 'Updates'   },
+  { href: '/',                label: 'Home'            },
+  { href: '/community',       label: 'Community'       },
+  { href: '/running-status',  label: 'Running Status'  },
+  { href: '/about',           label: 'About'           },
+  { href: '/updates',         label: 'Updates'         },
 ];
 
 interface LogEntry {
