@@ -297,6 +297,7 @@ export default function RunningStatusPage() {
   );
 
   const [customCards, setCustomCards] = useState<LocationCard[]>([]);
+  const [hideMajors, setHideMajors] = useState(false);
   const [searchQuery,   setSearchQuery]   = useState('');
   const [searchError,   setSearchError]   = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
@@ -474,7 +475,8 @@ export default function RunningStatusPage() {
     return evaluateRunConditions(card.weather).score;
   };
 
-  const allCards = [userCard, ...majorCards, ...customCards].sort((a, b) => scoreOf(b) - scoreOf(a));
+  const visibleMajors = hideMajors ? [] : majorCards;
+  const allCards = [userCard, ...visibleMajors, ...customCards].sort((a, b) => scoreOf(b) - scoreOf(a));
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -540,6 +542,16 @@ export default function RunningStatusPage() {
             >
               {searchLoading ? '…' : 'Add'}
             </button>
+            <button
+              onClick={() => setHideMajors((v) => !v)}
+              className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors cursor-pointer ${
+                hideMajors
+                  ? 'bg-slate-800 text-white border-slate-800 hover:bg-slate-700 hover:border-slate-700'
+                  : 'text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-100 hover:border-slate-300'
+              }`}
+            >
+              {hideMajors ? 'Show Majors' : 'Hide Majors'}
+            </button>
             {customCards.length > 0 && (
               <button
                 onClick={() => setCustomCards([])}
@@ -564,11 +576,16 @@ export default function RunningStatusPage() {
               📍 {userCard.subtitle === 'Detecting…' || userCard.subtitle === 'Location access denied' ? 'Your Location' : userCard.subtitle}
             </span>
             {/* majors */}
-            {majorCards.map((c) => (
+            {!hideMajors && majorCards.map((c) => (
               <span key={c.id} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-slate-200 bg-white text-slate-600">
                 {c.subtitle}
               </span>
             ))}
+            {hideMajors && (
+              <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-400 italic">
+                7 majors hidden
+              </span>
+            )}
             {/* custom */}
             {customCards.map((c) => (
               <span key={c.id} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-violet-200 bg-violet-50 text-violet-700">
