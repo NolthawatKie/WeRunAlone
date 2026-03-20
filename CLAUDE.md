@@ -112,8 +112,8 @@ From `SimilarPlansPanel`:
 - All writes go through server-side API routes (using `SUPABASE_SERVICE_ROLE_KEY`) — users cannot bypass rate limiting via direct Supabase calls
 
 **Rate limits** — all limits are defined in `lib/config.ts` (`LIMITS` object). Edit that file to change any limit without touching business logic.
-- Plan generation: max `LIMITS.PLAN_GENERATIONS_PER_IP` (default 3) per IP **lifetime**, enforced in `/api/generate`. Key `generate:{ip}`, no date filter.
-- Community sharing: max `LIMITS.COMMUNITY_SHARES_PER_DAY` (default 3) per IP **per day**, enforced in `/api/community/save`. Key `{ip}` + date filter.
+- Plan generation: dual limit — `LIMITS.PLAN_GENERATIONS_GLOBAL` (default 100) total across all users (`ip = 'global:generate'`) **AND** `LIMITS.PLAN_GENERATIONS_PER_IP` (default 3) per IP lifetime (`ip = 'generate:{ip}'`). Both rows inserted with `date` on creation for future analytics. No date filter on checks — lifetime counters.
+- Community sharing: **no rate limit** — sharing is unlimited. `/api/community/save` does not check `share_rate_limit`.
 
 **Target values stored in DB** (must match exactly for filter to work):
 `'Fun Run'` · `'Mini Marathon'` · `'Half Marathon'` · `'Full Marathon'`
@@ -230,7 +230,8 @@ Model: `claude-sonnet-4-6`, `max_tokens: LIMITS.MAX_OUTPUT_TOKENS` (default 14,0
 - **Race history validation** in StepTwo: experienced runners must add at least one race (unless target is Fun Run).
 - **Target time is required** in StepOne — Next is blocked until a valid finish time is set. Too-fast times (below `minTotalMin`) are rejected with an error message.
 - **`TimeInput` component** (`components/TimeInput.tsx`) is a shared H+MM dropdown pair. Used for target time (StepOne), beginner PB (StepTwo), and race PRs (StepTwo). `maxHours` prop controls the hour range per context.
-- **Community sharing** — user names their plan in `ShareModal` before sharing; `handleShare` sends both `plan_name` (user-chosen) and `plan_data` with `planName` updated to match. `OutputPlan` sends `target: formSummary.targetLabel` (e.g. `'Fun Run'`) to the save API. The community page filter dropdown `value` fields must match these exact strings.
+- **Community sharing** — user names their plan in `ShareModal` before sharing; `handleShare` sends both `plan_name` (user-chosen) and `plan_data` with `planName` updated to match. `OutputPlan` sends `target: formSummary.targetLabel` (e.g. `'Fun Run'`) to the save API. The community page filter dropdown `value` fields must match these exact strings. Sharing has no rate limit.
+- **Claude Skill** — `public/SKILL.md` follows the standard SKILL.md format (YAML frontmatter required). Users download it from `/about` and paste into Claude Project instructions to get the same coaching logic in their own Claude account. The file is served statically from `/public`.
 - **Navigation** — all page headers share the same three nav links (Community · About · Updates). Active page is highlighted with `bg-blue-50 text-blue-600`.
 - **Updates page** — `app/updates/page.tsx` is a server component that reads `updatelog.md` with `fs.readFileSync(path.join(process.cwd(), 'updatelog.md'))`. Parse: split by `\n`, filter lines starting with `|`, skip first two (header + separator), split each line by `|`. Add a new row to `updatelog.md` and redeploy after every change.
 
@@ -238,8 +239,8 @@ Model: `claude-sonnet-4-6`, `max_tokens: LIMITS.MAX_OUTPUT_TOKENS` (default 14,0
 
 Central place for all tunable constants:
 ```ts
-LIMITS.PLAN_GENERATIONS_PER_IP  // lifetime plan gen limit per IP (default 3)
-LIMITS.COMMUNITY_SHARES_PER_DAY // daily share limit per IP (default 3)
+LIMITS.PLAN_GENERATIONS_GLOBAL  // total plans across all users, lifetime (default 100)
+LIMITS.PLAN_GENERATIONS_PER_IP  // per IP, lifetime (default 3)
 LIMITS.MAX_OUTPUT_TOKENS        // Claude output token cap (default 14,000)
 ```
 Import as `import { LIMITS } from '@/lib/config'` in any route that needs these values.

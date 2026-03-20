@@ -157,6 +157,42 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* Claude Skill download */}
+        <section>
+          <h2 className="text-xl font-semibold text-slate-900 mb-1">Use it with your own Claude</h2>
+          <p className="text-sm text-slate-500 mb-6">
+            Take the same coaching logic to Claude.ai — no app needed
+          </p>
+          <div className="bg-white border border-slate-200 rounded-xl p-6">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-5">
+              <div className="flex-1">
+                <p className="text-sm text-slate-600 leading-relaxed mb-3">
+                  Download the <strong>WeRunAlone Skill</strong> — a ready-made instruction file you paste into
+                  any Claude Project. Claude will guide you through the same 4-step flow and generate
+                  a full periodised plan directly in your chat, using the same coaching rules, volume
+                  targets, and pace zones as this app.
+                </p>
+                <ol className="text-xs text-slate-500 space-y-1 list-decimal list-inside">
+                  <li>Download the file below</li>
+                  <li>Go to <span className="font-medium text-slate-700">claude.ai → Projects → Project instructions</span></li>
+                  <li>Paste the entire file contents and save</li>
+                  <li>Start a new chat inside that project — Claude is now your running coach</li>
+                </ol>
+              </div>
+              <a
+                href="/SKILL.md"
+                download="WeRunAlone-Skill.md"
+                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg flex-shrink-0 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+                Download Skill
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* Architecture callouts */}
         <section>
           <h2 className="text-xl font-semibold text-slate-900 mb-1">Key design decisions</h2>

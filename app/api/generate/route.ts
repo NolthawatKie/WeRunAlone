@@ -144,24 +144,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Rate limit: max 3 plan generations per IP (lifetime) ─────────────────
+    // ── Rate limit: global budget + per-IP lifetime cap ──────────────────────
     const ip =
       request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
       request.headers.get('x-real-ip') ??
       '127.0.0.1';
-    const generateIpKey = `generate:${ip}`;
+    const GLOBAL_KEY = 'global:generate';
+    const ipKey = `generate:${ip}`;
 
-    const { data: rateRow } = await supabase
-      .from('share_rate_limit')
-      .select('id, count')
-      .eq('ip', generateIpKey)
-      .maybeSingle();
+    const [{ data: globalRow }, { data: ipRow }] = await Promise.all([
+      supabase.from('share_rate_limit').select('id, count').eq('ip', GLOBAL_KEY).maybeSingle(),
+      supabase.from('share_rate_limit').select('id, count').eq('ip', ipKey).maybeSingle(),
+    ]);
 
-    if (rateRow && rateRow.count >= LIMITS.PLAN_GENERATIONS_PER_IP) {
-      return NextResponse.json(
-        { error: 'RATE_LIMIT' },
-        { status: 429 },
-      );
+    if (globalRow && globalRow.count >= LIMITS.PLAN_GENERATIONS_GLOBAL) {
+      return NextResponse.json({ error: 'RATE_LIMIT' }, { status: 429 });
+    }
+    if (ipRow && ipRow.count >= LIMITS.PLAN_GENERATIONS_PER_IP) {
+      return NextResponse.json({ error: 'RATE_LIMIT' }, { status: 429 });
     }
 
     const client = new Anthropic({ apiKey });
@@ -432,17 +432,15 @@ Generate ALL ${totalPhases} phases with ALL days (${days.join(', ')}), full sess
 
     plan = injectWarmupCooldown(plan, getWorkoutTemplate(targetLabel, level));
 
-    // ── Update generate rate limit count ──────────────────────────────────────
-    if (rateRow) {
-      await supabase
-        .from('share_rate_limit')
-        .update({ count: rateRow.count + 1 })
-        .eq('id', rateRow.id);
-    } else {
-      await supabase
-        .from('share_rate_limit')
-        .insert({ ip: generateIpKey, date: new Date().toISOString().split('T')[0], count: 1 });
-    }
+    // ── Increment global + per-IP generation counters ────────────────────────
+    await Promise.all([
+      globalRow
+        ? supabase.from('share_rate_limit').update({ count: globalRow.count + 1 }).eq('id', globalRow.id)
+        : supabase.from('share_rate_limit').insert({ ip: GLOBAL_KEY, count: 1, date: new Date().toISOString().slice(0, 10) }),
+      ipRow
+        ? supabase.from('share_rate_limit').update({ count: ipRow.count + 1 }).eq('id', ipRow.id)
+        : supabase.from('share_rate_limit').insert({ ip: ipKey, count: 1, date: new Date().toISOString().slice(0, 10) }),
+    ]);
 
     return NextResponse.json(plan);
   } catch (error) {

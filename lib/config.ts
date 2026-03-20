@@ -4,11 +4,11 @@
  */
 
 export const LIMITS = {
-  /** Maximum number of training plans a single IP can generate (lifetime). */
-  PLAN_GENERATIONS_PER_IP: 3,
+  /** Maximum total number of training plans generated across ALL users combined (global lifetime budget). */
+  PLAN_GENERATIONS_GLOBAL: 100,
 
-  /** Maximum number of community plans a single IP can share per day. */
-  COMMUNITY_SHARES_PER_DAY: 3,
+  /** Maximum number of training plans a single IP can generate (lifetime, regardless of global budget). */
+  PLAN_GENERATIONS_PER_IP: 3,
 
   /**
    * Maximum output tokens for Claude plan generation.

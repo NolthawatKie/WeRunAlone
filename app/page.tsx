@@ -487,15 +487,15 @@ export default function Home() {
             {modal === 'rate_limit' && (
               <>
                 <div className="text-2xl mb-3">🚦</div>
-                <h2 className="text-base font-semibold text-slate-900 mb-2">Daily limit reached</h2>
+                <h2 className="text-base font-semibold text-slate-900 mb-2">Generation limit reached</h2>
                 <p className="text-sm text-slate-600 leading-relaxed mb-5">
-                  You&apos;ve used all 3 plan generations available for this showcase. The community plans are still available to browse.
+                  This showcase has reached its total plan generation limit. You can still browse and use community plans for free.
                 </p>
                 <button
                   onClick={() => { setModal(null); setAppState('landing'); }}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-lg cursor-pointer"
                 >
-                  Back to home
+                  Browse community plans
                 </button>
               </>
             )}
