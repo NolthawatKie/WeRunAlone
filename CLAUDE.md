@@ -38,6 +38,7 @@ WAQI_TOKEN=...
 |-------|------|-------------|
 | `/` | `app/page.tsx` | Main app — landing + 4-step form + similar plans + plan output |
 | `/community` | `app/community/page.tsx` | Browse & view shared community plans |
+| `/running-status` | `app/running-status/page.tsx` | Live run conditions ranked by score — user location + 7 World Majors + up to 4 custom cities |
 | `/about` | `app/about/page.tsx` | Static server component — objective, stack, architecture, design decisions |
 | `/updates` | `app/updates/page.tsx` | Server component — reads `updatelog.md`, renders changelog as table |
 
@@ -93,6 +94,30 @@ From `SimilarPlansPanel`:
 - **`/api/aqi`** (`app/api/aqi/route.ts`) — server-side WAQI proxy (keeps token secret)
   - Returns `{ aqi, pm25, station }` or `{ aqi: null }` if `WAQI_TOKEN` env var missing
   - `next: { revalidate: 600 }` — 10-minute cache
+
+### Running Status page (`app/running-status/page.tsx`)
+
+Ranked run conditions for multiple locations. Three location types: `user` (blue tint), `major` (no tint), `custom` (violet tint).
+
+**State:**
+- `userCard` — user's GPS location (auto-fetched on mount via browser Geolocation)
+- `majorCards` — 7 World Majors from `lib/world-majors.ts` (static lat/lon, no API needed)
+- `customCards` — up to 4 user-added cities (geocoded via `/api/geocode`, max 12 total including user + majors)
+- `hideMajors` — boolean; when true, majors are excluded from ranking and summary strip
+
+**Ranking:** `[userCard, ...visibleMajors, ...customCards].sort((a, b) => scoreOf(b) - scoreOf(a))` — descending by run score.
+
+**APIs:**
+- **`/api/weather-batch`** — single Open-Meteo call for all lat/lon pairs + parallel WAQI calls server-side; returns `WeatherSnapshot[]` with `aqi` + `aqiStation`. `next: { revalidate: 1800 }` (30-min cache).
+- **`/api/geocode`** — Nominatim proxy; accepts `?q=city`, returns `{lat, lon, displayName}`. `next: { revalidate: 3600 }` (1-hour cache). Proper User-Agent header required by Nominatim ToS.
+
+**Scoring** (same algorithm as `WeatherWidget`): 0–100. Deducts for heat index (5 tiers), weather code, wind, precipitation, AQI (7 tiers). `getAqiInfo` imported from `WeatherWidget`.
+
+**World Majors** (`lib/world-majors.ts`): Static array of 7 official races from worldmarathonmajors.com — Tokyo, Boston, London, Sydney, Berlin, Chicago, New York. Update this file if new majors are added. No month/year shown.
+
+**Hide Majors toggle:** Button in search row. When `hideMajors=true`, location summary strip shows `"7 majors hidden"` grey italic pill instead of individual major pills.
+
+**Navigation:** includes Home link (`<Link href="/">`), Community, About, Updates. `WeatherNavBadge` present in header.
 
 ### Community feature
 
@@ -231,8 +256,9 @@ Model: `claude-sonnet-4-6`, `max_tokens: LIMITS.MAX_OUTPUT_TOKENS` (default 14,0
 - **Target time is required** in StepOne — Next is blocked until a valid finish time is set. Too-fast times (below `minTotalMin`) are rejected with an error message.
 - **`TimeInput` component** (`components/TimeInput.tsx`) is a shared H+MM dropdown pair. Used for target time (StepOne), beginner PB (StepTwo), and race PRs (StepTwo). `maxHours` prop controls the hour range per context.
 - **Community sharing** — user names their plan in `ShareModal` before sharing; `handleShare` sends both `plan_name` (user-chosen) and `plan_data` with `planName` updated to match. `OutputPlan` sends `target: formSummary.targetLabel` (e.g. `'Fun Run'`) to the save API. The community page filter dropdown `value` fields must match these exact strings. Sharing has no rate limit.
-- **Claude Skill** — `public/SKILL.md` follows the standard SKILL.md format (YAML frontmatter required). Users download it from `/about` and paste into Claude Project instructions to get the same coaching logic in their own Claude account. The file is served statically from `/public`.
-- **Navigation** — all page headers share the same three nav links (Community · About · Updates). Active page is highlighted with `bg-blue-50 text-blue-600`.
+- **Claude Skill** — `public/SKILL.md` follows the standard SKILL.md format (YAML frontmatter required). Users download it from `/about` and paste into Claude Project instructions to get the same coaching logic in their own Claude account. The file is served statically from `/public`. Also contains Running Status scoring tables and World Majors reference.
+- **Navigation** — all page headers share nav links: Home · Community · About · Updates. Active page highlighted `bg-blue-50 text-blue-600`. On `page.tsx`, Home is a `<button onClick={handleReset}>` (not `<Link>`) so mid-form users return to landing without a full page reload and without losing session state. On all other pages, Home is `<Link href="/">`.
+- **Disclaimers** — showcase banner on landing page; AI guideline warning on StepFour (before generation) and Community page (above plan list).
 - **Updates page** — `app/updates/page.tsx` is a server component that reads `updatelog.md` with `fs.readFileSync(path.join(process.cwd(), 'updatelog.md'))`. Parse: split by `\n`, filter lines starting with `|`, skip first two (header + separator), split each line by `|`. Add a new row to `updatelog.md` and redeploy after every change.
 
 ### Config (`lib/config.ts`)

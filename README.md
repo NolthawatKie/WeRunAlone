@@ -15,6 +15,7 @@ Users fill a 4-step form → Claude generates a personalised plan → export as 
 - **PNG export** — save plan as image; mobile uses Web Share API, desktop downloads directly
 - **Community feed** — browse, filter, view, and download shared plans
 - **Weather widget** — run condition score based on location, temperature, humidity, wind, and AQI
+- **Running Status page** — live ranked run conditions for your location, all 7 World Marathon Majors, and up to 4 custom cities; hide majors toggle to compare custom locations only
 - **Rate limiting** — 100 plans global lifetime cap + 3 plans per IP lifetime cap
 - **Claude Skill** — downloadable `SKILL.md` on the About page; use the same coach logic inside your own Claude Project
 - **About & Updates pages** — project overview and changelog rendered from `updatelog.md`
@@ -117,6 +118,7 @@ export const LIMITS = {
 |-------|-------------|
 | `/` | Landing + 4-step form + similar plans + plan output |
 | `/community` | Browse & filter shared community plans |
+| `/running-status` | Live run conditions ranked by score — user location, 7 World Majors, custom cities |
 | `/about` | Objective, tech stack, architecture + Skill download |
 | `/updates` | Changelog from `updatelog.md` |
 
@@ -144,10 +146,15 @@ app/api/community/list          — filter by target/level/weeksNear
 app/api/community/[id]          — fetch single plan
 app/api/community/download/[id] — increment download_count + return plan
 app/api/aqi                     — server-side WAQI proxy
+app/api/weather-batch           — batch Open-Meteo + WAQI fetch for running-status (30-min cache)
+app/api/geocode                 — Nominatim proxy; city name → lat/lon (1-hour cache)
+
+app/running-status/page.tsx     — ranked run conditions: user location + 7 majors + custom cities
 
 lib/config.ts                   — all tunable limits
 lib/workout-templates.ts        — 8 static warmup/cooldown templates
-public/SKILL.md                 — downloadable Claude Skill for running plans
+lib/world-majors.ts             — static list of 7 official World Marathon Majors (lat/lon)
+public/SKILL.md                 — downloadable Claude Skill for running plans + Running Status scoring
 updatelog.md                    — changelog source; add a row + redeploy to update /updates
 ```
 
@@ -159,6 +166,8 @@ updatelog.md                    — changelog source; add a row + redeploy to up
 - **Dual rate limit** — global counter (`ip = 'global:generate'`) + per-IP counter (`ip = 'generate:{ip}'`), both in `share_rate_limit` table, both lifetime (no date filter)
 - **Sharing unlimited** — community sharing has no rate limit; only plan generation is capped
 - **Claude Skill** — `public/SKILL.md` follows the standard SKILL.md format with YAML frontmatter; users download it from `/about` and paste into Claude Project instructions
+- **Running Status** — single Open-Meteo batch call for all locations; WAQI AQI fetched server-side in parallel; 30-min cache; custom cities add 2 calls (geocode + weather+AQI); max ~6 calls per session
+- **Home nav** — all page headers include Home link; on `page.tsx` it calls `handleReset` (not `<Link>`) to return to landing without losing session state
 
 ---
 
