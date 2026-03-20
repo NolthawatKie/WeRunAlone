@@ -486,6 +486,9 @@ export default function RunningStatusPage() {
             <span className="font-bold text-slate-900 text-base hover:text-blue-600">WeRunAlone</span>
           </Link>
           <nav className="flex items-center gap-1 ml-auto">
+            <Link href="/" className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+              Home
+            </Link>
             <Link href="/community" className="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors">
               Community
             </Link>

@@ -2,6 +2,7 @@
 
 | Date | Update Details |
 |------|----------------|
+| 2026-03-20 | Running Status page — live running conditions ranked by score for your location, all 7 World Marathon Majors (source: worldmarathonmajors.com), and up to 4 custom cities; shows weather, heat index, AQI, and run score (0–100) per location |
 | 2026-03-20 | Added downloadable Claude Skill (SKILL.md) on About page — lets users run the same coach logic in their own Claude Projects |
 | 2026-03-20 | Removed community share rate limit — sharing is now unlimited; generation limits unchanged |
 | 2026-03-20 | Generation rate limit now dual: global cap (300 total across all users) + per-IP cap (3 lifetime) |
